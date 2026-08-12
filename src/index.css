@@ -1,0 +1,99 @@
+/* src/index.css */
+:root {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
+  --font-display: 'Outfit', var(--font-sans);
+  
+  /* Slate Design System (Notion/Linear Inspired) */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #f1f5f9;
+  
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  
+  --border-light: #e2e8f0;
+  --border-dark: #cbd5e1;
+  
+  /* Statuses */
+  --color-draft: #eab308;
+  --bg-draft: #fef9c3;
+  --border-draft: #fef08a;
+
+  --color-ready: #6366f1;
+  --bg-ready: #e0e7ff;
+  --border-ready: #c7d2fe;
+
+  --color-scheduled: #3b82f6;
+  --bg-scheduled: #dbeafe;
+  --border-scheduled: #bfdbfe;
+
+  --color-published: #22c55e;
+  --bg-published: #dcfce7;
+  --border-published: #bbf7d0;
+
+  --color-archived: #64748b;
+  --bg-archived: #f1f5f9;
+  --border-archived: #e2e8f0;
+
+  /* Accent */
+  --color-accent: #0f172a;
+  --color-accent-hover: #1e293b;
+  --color-accent-light: #f1f5f9;
+  
+  /* Elevation */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
+
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+/* Scrollbar styles */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-dark);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
