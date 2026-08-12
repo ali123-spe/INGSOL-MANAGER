@@ -1,0 +1,1 @@
+# INGSOL-MANAGER
