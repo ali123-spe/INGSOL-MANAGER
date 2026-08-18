@@ -39,12 +39,14 @@ export function normalizeDate(input) {
 }
 
 // Subcomponent: Loads blob media from IndexedDB and displays it
-export function PostCardThumbnail({ mediaId, title, contentType }) {
+export function PostCardThumbnail({ mediaId, linkPreviewImage, title, contentType }) {
   const [imgUrl, setImgUrl] = useState(null);
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     let active = true;
     let url = null;
+    setHasError(false);
 
     if (mediaId) {
       getMediaBlob(mediaId)
@@ -57,6 +59,10 @@ export function PostCardThumbnail({ mediaId, title, contentType }) {
         .catch(err => {
           console.error("Error loading thumbnail blob:", err);
         });
+    } else if (linkPreviewImage) {
+      setImgUrl(linkPreviewImage);
+    } else {
+      setImgUrl(null);
     }
 
     return () => {
@@ -65,10 +71,18 @@ export function PostCardThumbnail({ mediaId, title, contentType }) {
         URL.revokeObjectURL(url);
       }
     };
-  }, [mediaId]);
+  }, [mediaId, linkPreviewImage]);
 
-  if (imgUrl) {
-    return <img src={imgUrl} alt={title} className="card-thumbnail" loading="lazy" />;
+  if (imgUrl && !hasError) {
+    return (
+      <img 
+        src={imgUrl} 
+        alt={title} 
+        className="card-thumbnail" 
+        loading="lazy" 
+        onError={() => setHasError(true)} 
+      />
+    );
   }
 
   // Styled text card if there is no image
@@ -276,6 +290,7 @@ export default function CalendarView({
                       <div className="card-thumbnail-container">
                         <PostCardThumbnail 
                           mediaId={post.mediaId} 
+                          linkPreviewImage={post.linkPreviewImage}
                           title={post.title} 
                           contentType={post.contentType} 
                         />
@@ -387,7 +402,7 @@ export default function CalendarView({
                       style={{ padding: '8px' }}
                     >
                       <div className="card-thumbnail-container" style={{ aspectRatio: '16/10' }}>
-                        <PostCardThumbnail mediaId={post.mediaId} title={post.title} contentType={post.contentType} />
+                        <PostCardThumbnail mediaId={post.mediaId} linkPreviewImage={post.linkPreviewImage} title={post.title} contentType={post.contentType} />
                       </div>
                       <div className="card-info" style={{ marginTop: '6px', gap: '4px' }}>
                         <div className="card-title" style={{ fontSize: '0.82rem', webkitLineClamp: 3 }}>{post.title}</div>
@@ -472,7 +487,7 @@ export default function CalendarView({
                   style={{ padding: '12px', height: 'fit-content' }}
                 >
                   <div className="card-thumbnail-container" style={{ aspectRatio: '16 / 9' }}>
-                    <PostCardThumbnail mediaId={post.mediaId} title={post.title} contentType={post.contentType} />
+                    <PostCardThumbnail mediaId={post.mediaId} linkPreviewImage={post.linkPreviewImage} title={post.title} contentType={post.contentType} />
                   </div>
                   <div className="card-info" style={{ marginTop: '10px', gap: '8px' }}>
                     <div className="card-title" style={{ fontSize: '0.95rem', fontWeight: 800, webkitLineClamp: 3 }}>

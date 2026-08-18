@@ -35,18 +35,26 @@ export default function PostDetailsDrawer({
     let active = true;
     let url = null;
 
-    if (post && post.contentType !== 'Carousel' && post.contentType !== 'Text' && post.mediaId) {
-      getMediaBlob(post.mediaId)
-        .then(blob => {
-          if (blob && active) {
-            url = URL.createObjectURL(blob);
-            setSingleMediaUrl(url);
-            setSingleMimeType(post.mediaMimeType || blob.type || null);
-          }
-        })
-        .catch(err => {
-          console.error("Error loading drawer media:", err);
-        });
+    if (post && post.contentType !== 'Carousel' && post.contentType !== 'Text') {
+      if (post.mediaId) {
+        getMediaBlob(post.mediaId)
+          .then(blob => {
+            if (blob && active) {
+              url = URL.createObjectURL(blob);
+              setSingleMediaUrl(url);
+              setSingleMimeType(post.mediaMimeType || blob.type || null);
+            }
+          })
+          .catch(err => {
+            console.error("Error loading drawer media:", err);
+          });
+      } else if (post.linkPreviewImage) {
+        setSingleMediaUrl(post.linkPreviewImage);
+        setSingleMimeType('image/generic');
+      } else {
+        setSingleMediaUrl(null);
+        setSingleMimeType(null);
+      }
     } else {
       setSingleMediaUrl(null);
       setSingleMimeType(null);
@@ -169,7 +177,7 @@ export default function PostDetailsDrawer({
                   )
                 ) : (
                   <div style={{ width: '100%', aspectRatio: '16 / 10', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-muted)' }}>
-                    Loading creative asset...
+                    {post.mediaId ? 'Loading creative asset...' : 'No creative asset uploaded'}
                   </div>
                 )}
               </div>

@@ -47,6 +47,11 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
   const [existingMediaId, setExistingMediaId] = useState(null);
   const [existingMimeType, setExistingMimeType] = useState(null);
 
+  // Link Preview states & cache
+  const [linkPreviewImage, setLinkPreviewImage] = useState('');
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+  const previewCache = useRef({});
+
   // Carousel slides state
   const [carouselSlides, setCarouselSlides] = useState([]);
 
@@ -72,6 +77,7 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
       setTagsInput(post.tags ? post.tags.join(', ') : '');
       setExistingMediaId(post.mediaId || null);
       setExistingMimeType(post.mediaMimeType || null);
+      setLinkPreviewImage(post.linkPreviewImage || '');
 
       if (post.contentType === 'Carousel') {
         setCarouselSlides(post.carouselSlides || []);
@@ -104,6 +110,7 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
       setSingleFileType(null);
       setExistingMediaId(null);
       setExistingMimeType(null);
+      setLinkPreviewImage('');
       setCarouselSlides([]);
     }
 
@@ -114,6 +121,53 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
       }
     };
   }, [post, datePreset]);
+
+  // Effect to automatically detect URL, debounce request, and fetch link preview
+  useEffect(() => {
+    const urlRegex = /(https?:\/\/[^\s]+)/gi;
+    let match = urlRegex.exec(caption);
+    if (!match && designUrl) {
+      urlRegex.lastIndex = 0;
+      match = urlRegex.exec(designUrl);
+    }
+    const detectedUrl = match ? match[1] : '';
+
+    if (!detectedUrl) {
+      setLinkPreviewImage('');
+      return;
+    }
+
+    // Check memory cache
+    if (previewCache.current[detectedUrl]) {
+      setLinkPreviewImage(previewCache.current[detectedUrl].image || '');
+      return;
+    }
+
+    setIsLoadingPreview(true);
+    const timeoutId = setTimeout(async () => {
+      try {
+        const response = await fetch(`/api/link-preview?url=${encodeURIComponent(detectedUrl)}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.image) {
+            previewCache.current[detectedUrl] = data;
+            setLinkPreviewImage(data.image);
+          } else {
+            setLinkPreviewImage('');
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching link preview:", err);
+      } finally {
+        setIsLoadingPreview(false);
+      }
+    }, 800);
+
+    return () => {
+      clearTimeout(timeoutId);
+      setIsLoadingPreview(false);
+    };
+  }, [caption, designUrl]);
 
   // Clean up carousel slide previews on unmount
   useEffect(() => {
@@ -175,7 +229,7 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
           newErrors.media = 'At least 1 slide is required for carousel posts';
         }
       } else {
-        if (!singleFile && !existingMediaId) {
+        if (!singleFile && !existingMediaId && !linkPreviewImage) {
           newErrors.media = `${contentType} creative asset is required`;
         }
       }
@@ -325,7 +379,8 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
       figmaUrl: finalDesignUrl,    // backward compat for existing code that reads figmaUrl
       publishedUrl: finalPublishedUrl,
       tags: tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0),
-      createdAt: isEditMode ? post.createdAt : new Date().toISOString()
+      createdAt: isEditMode ? post.createdAt : new Date().toISOString(),
+      linkPreviewImage: linkPreviewImage
     };
 
     const filesMap = {};
@@ -485,6 +540,18 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
                           </button>
                         </div>
                       </div>
+                    ) : linkPreviewImage ? (
+                      <div className="uploaded-preview-container">
+                        <img src={linkPreviewImage} alt="Link Preview" className="uploaded-preview-image" />
+                        <div style={{ position: 'absolute', top: 6, left: 6, zIndex: 1, backgroundColor: 'rgba(15, 23, 42, 0.8)', color: 'white', fontSize: '0.65rem', padding: '2px 6px', borderRadius: 10, fontWeight: 700 }}>
+                          Auto Link Preview
+                        </div>
+                        {isLoadingPreview && (
+                          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.4)', borderRadius: 'var(--radius-sm)' }}>
+                            <span style={{ color: 'white', fontSize: '0.8rem', fontWeight: 600 }}>Updating preview...</span>
+                          </div>
+                        )}
+                      </div>
                     ) : (
                       <div
                         className="upload-dropzone"
@@ -492,17 +559,26 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
                         onDragOver={(e) => e.preventDefault()}
                         onDrop={handleSingleFileDrop}
                       >
-                        <Upload className="upload-dropzone-icon" />
-                        <div className="upload-dropzone-text">
-                          {contentType === 'Video' || contentType === 'Reel'
-                            ? 'Click or drag your video here'
-                            : 'Click or drag images / PDF here'}
-                        </div>
-                        <div className="upload-dropzone-sub">
-                          {contentType === 'Video' || contentType === 'Reel'
-                            ? 'Supports MP4, MOV, WebM'
-                            : 'Supports PNG, JPG, WebP, PDF · Select multiple images to auto-create a Carousel'}
-                        </div>
+                        {isLoadingPreview ? (
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+                            <div className="spinner" style={{ width: 24, height: 24, border: '3px solid var(--border-light)', borderTopColor: 'var(--color-accent)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+                            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Fetching link preview...</span>
+                          </div>
+                        ) : (
+                          <>
+                            <Upload className="upload-dropzone-icon" />
+                            <div className="upload-dropzone-text">
+                              {contentType === 'Video' || contentType === 'Reel'
+                                ? 'Click or drag your video here'
+                                : 'Click or drag images / PDF here'}
+                            </div>
+                            <div className="upload-dropzone-sub">
+                              {contentType === 'Video' || contentType === 'Reel'
+                                ? 'Supports MP4, MOV, WebM'
+                                : 'Supports PNG, JPG, WebP, PDF · Select multiple images to auto-create a Carousel'}
+                            </div>
+                          </>
+                        )}
                       </div>
                     )}
                     <input
