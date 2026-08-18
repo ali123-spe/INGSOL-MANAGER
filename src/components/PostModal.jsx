@@ -2,11 +2,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import CarouselUploader from './CarouselUploader';
 import { getMediaBlob } from '../services/db';
-import { X, Upload, FileCheck, Trash2, ExternalLink } from 'lucide-react';
+import { 
+  X, 
+  Upload, 
+  Trash2, 
+  ExternalLink,
+  Calendar,
+  Sparkles,
+  Link as LinkIcon
+} from 'lucide-react';
 
 /**
  * Detect which design platform a URL belongs to.
- * Returns { label, color } for the URL field badge.
  */
 export function detectDesignPlatform(url) {
   if (!url) return { label: 'Design / Source URL', color: '#64748b' };
@@ -35,7 +42,6 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
   const [status, setStatus] = useState('Draft');
   const [caption, setCaption] = useState('');
   const [notes, setNotes] = useState('');
-  // Generic design URL — replaces old figmaUrl; read both for backward compat
   const [designUrl, setDesignUrl] = useState('');
   const [publishedUrl, setPublishedUrl] = useState('');
   const [tagsInput, setTagsInput] = useState('');
@@ -43,12 +49,13 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
   // File upload states (Single Post, Video, or PDF)
   const [singleFile, setSingleFile] = useState(null);
   const [singleFilePreview, setSingleFilePreview] = useState(null);
-  const [singleFileType, setSingleFileType] = useState(null); // 'image' | 'video' | 'pdf'
+  const [singleFileType, setSingleFileType] = useState(null);
   const [existingMediaId, setExistingMediaId] = useState(null);
   const [existingMimeType, setExistingMimeType] = useState(null);
 
   // Link Preview states & cache
   const [linkPreviewImage, setLinkPreviewImage] = useState('');
+  const [linkPreviewMetadata, setLinkPreviewMetadata] = useState(null);
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
   const previewCache = useRef({});
 
@@ -71,7 +78,6 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
       setStatus(post.status || 'Draft');
       setCaption(post.caption || '');
       setNotes(post.notes || '');
-      // Backward compat: read designUrl OR legacy figmaUrl
       setDesignUrl(post.designUrl || post.figmaUrl || '');
       setPublishedUrl(post.publishedUrl || '');
       setTagsInput(post.tags ? post.tags.join(', ') : '');
@@ -82,7 +88,6 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
       if (post.contentType === 'Carousel') {
         setCarouselSlides(post.carouselSlides || []);
       } else if (post.mediaId) {
-        // Load existing media preview
         getMediaBlob(post.mediaId).then(blob => {
           if (blob) {
             const url = URL.createObjectURL(blob);
@@ -111,11 +116,11 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
       setExistingMediaId(null);
       setExistingMimeType(null);
       setLinkPreviewImage('');
+      setLinkPreviewMetadata(null);
       setCarouselSlides([]);
     }
 
     return () => {
-      // Clean up object URLs to prevent leaks
       if (singleFilePreview && singleFilePreview.startsWith('blob:')) {
         URL.revokeObjectURL(singleFilePreview);
       }
@@ -134,12 +139,14 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
 
     if (!detectedUrl) {
       setLinkPreviewImage('');
+      setLinkPreviewMetadata(null);
       return;
     }
 
-    // Check memory cache
     if (previewCache.current[detectedUrl]) {
-      setLinkPreviewImage(previewCache.current[detectedUrl].image || '');
+      const cached = previewCache.current[detectedUrl];
+      setLinkPreviewImage(cached.image || '');
+      setLinkPreviewMetadata(cached);
       return;
     }
 
@@ -152,8 +159,10 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
           if (data && data.image) {
             previewCache.current[detectedUrl] = data;
             setLinkPreviewImage(data.image);
+            setLinkPreviewMetadata(data);
           } else {
             setLinkPreviewImage('');
+            setLinkPreviewMetadata(null);
           }
         }
       } catch (err) {
@@ -202,23 +211,21 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
       newErrors.date = 'Publish Date is required';
     }
 
-    // Design URL: validate it's a real URL if provided (any platform allowed)
     const formattedDesign = ensureAbsoluteUrl(designUrl);
     if (formattedDesign) {
       try {
         new URL(formattedDesign);
-      } catch (err) {
-        newErrors.designUrl = 'Please enter a valid URL (e.g. https://www.figma.com/design/... or canva.com/design/...)';
+      } catch {
+        newErrors.designUrl = 'Please enter a valid URL';
       }
     }
 
-    // Published URL validation
     const formattedPublished = ensureAbsoluteUrl(publishedUrl);
     if (formattedPublished) {
       try {
         new URL(formattedPublished);
-      } catch (err) {
-        newErrors.publishedUrl = 'Please enter a valid published post URL';
+      } catch {
+        newErrors.publishedUrl = 'Please enter a valid URL';
       }
     }
 
@@ -230,7 +237,7 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
         }
       } else {
         if (!singleFile && !existingMediaId && !linkPreviewImage) {
-          newErrors.media = `${contentType} creative asset is required`;
+          newErrors.media = `${contentType} creative asset or link preview is required`;
         }
       }
     }
@@ -239,20 +246,17 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Helper: determine file category from MIME type
   const getFileType = (file) => {
     if (file.type === 'application/pdf') return 'pdf';
     if (file.type.startsWith('video/')) return 'video';
     return 'image';
   };
 
-  // Helper: derive accept string for the file input
   const getAcceptString = () => {
     if (contentType === 'Video' || contentType === 'Reel') return 'video/*';
     return 'image/*,application/pdf';
   };
 
-  // Render the appropriate preview for the uploaded file
   const renderFilePreview = () => {
     if (!singleFilePreview) return null;
     if (singleFileType === 'pdf' || existingMimeType === 'application/pdf') {
@@ -260,7 +264,7 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
         <embed
           src={singleFilePreview}
           type="application/pdf"
-          style={{ width: '100%', height: '320px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-light)' }}
+          style={{ width: '100%', height: '300px', borderRadius: 'var(--radius-sm)' }}
         />
       );
     }
@@ -270,12 +274,10 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
     return <img src={singleFilePreview} alt="Preview" className="uploaded-preview-image" />;
   };
 
-  // Helper: convert a FileList/array into carousel slides and switch mode
   const loadFilesAsCarousel = (fileList) => {
     const imageFiles = Array.from(fileList).filter(f => f.type.startsWith('image/'));
     if (imageFiles.length === 0) return;
 
-    // Build slide objects (same shape CarouselUploader uses)
     const newSlides = imageFiles.map((file, idx) => ({
       id: `slide_new_${Date.now()}_${idx}_${Math.random().toString(36).substr(2, 5)}`,
       file,
@@ -297,13 +299,11 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
     setErrors(prev => ({ ...prev, media: null }));
   };
 
-  // Handle single media file selection — supports multi-select (auto-promotes to Carousel)
   const handleSingleFileSelect = (e) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
     if (files.length > 1) {
-      // Multiple images selected → auto-promote to Carousel
       loadFilesAsCarousel(files);
     } else {
       const file = files[0];
@@ -317,7 +317,6 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
       setExistingMediaId(null);
       setExistingMimeType(null);
     }
-    // Reset input so same file can be re-selected
     e.target.value = '';
   };
 
@@ -359,24 +358,24 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
   };
 
   // Submit Handler
-  const handleSave = () => {
+  const handleSave = (forcedStatus) => {
     if (!validateForm()) return;
 
     const finalDesignUrl = ensureAbsoluteUrl(designUrl);
     const finalPublishedUrl = ensureAbsoluteUrl(publishedUrl);
+    const finalStatus = forcedStatus || status;
 
-    // Build the post object
     const postData = {
       id: isEditMode ? post.id : `post_${Date.now()}`,
       title,
       date,
       platform,
       contentType,
-      status,
+      status: finalStatus,
       caption,
       notes,
-      designUrl: finalDesignUrl,   // new canonical field
-      figmaUrl: finalDesignUrl,    // backward compat for existing code that reads figmaUrl
+      designUrl: finalDesignUrl,
+      figmaUrl: finalDesignUrl,
       publishedUrl: finalPublishedUrl,
       tags: tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0),
       createdAt: isEditMode ? post.createdAt : new Date().toISOString(),
@@ -386,11 +385,8 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
     const filesMap = {};
 
     if (contentType === 'Carousel') {
-      // Map slides to file storage
       const slidesMetadata = carouselSlides.map((slide, idx) => {
         const mediaId = slide.mediaId || `media_slide_${Date.now()}_${idx}`;
-        
-        // If there is a new file uploaded, save it to IndexedDB
         if (slide.file) {
           filesMap[mediaId] = slide.file;
         }
@@ -404,13 +400,11 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
       });
 
       postData.carouselSlides = slidesMetadata;
-      // Set the cover slide's mediaId as the post's main mediaId for thumbnails
       postData.mediaId = slidesMetadata[0]?.mediaId || null;
     } else if (contentType !== 'Text') {
       const mediaId = existingMediaId || `media_single_${Date.now()}`;
-      postData.mediaId = mediaId;
+      postData.mediaId = singleFile ? mediaId : (existingMediaId || null);
       postData.carouselSlides = [];
-      // Store MIME type so the drawer can render PDF/video correctly
       postData.mediaMimeType = singleFile ? singleFile.type : (existingMimeType || null);
 
       if (singleFile) {
@@ -424,17 +418,32 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
     onSave(postData, filesMap);
   };
 
+  const platformsList = [
+    { id: 'LinkedIn', label: 'LinkedIn', color: '#024791' },
+    { id: 'Instagram', label: 'Instagram', color: '#e1306c' },
+    { id: 'Facebook', label: 'Facebook', color: '#1877f2' },
+    { id: 'X', label: 'X (Twitter)', color: '#111827' },
+    { id: 'Other', label: 'Other', color: '#545454' }
+  ];
+
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-container" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2 className="modal-title">{isEditMode ? 'Edit Social Post' : 'Create Social Post'}</h2>
-          <button className="modal-close" onClick={onClose}>
+      <div className="modal-container physical-sheet-modal" onClick={(e) => e.stopPropagation()}>
+        
+        {/* Metal eyelet/staple accent */}
+        <div className="sheet-staple-accent"></div>
+
+        <div className="modal-header paper-sheet-header">
+          <div className="modal-header-text">
+            <span className="sheet-kicker">CONTENT MANIFEST</span>
+            <h2 className="modal-title">{isEditMode ? 'Edit Social Post' : 'Create Social Post'}</h2>
+          </div>
+          <button className="modal-close tactile-close-btn" onClick={onClose}>
             <X size={18} />
           </button>
         </div>
 
-        <div className="modal-body">
+        <div className="modal-body paper-sheet-body">
           <div className="form-grid">
             
             {/* Title */}
@@ -444,66 +453,55 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className={`input-field ${errors.title ? 'error' : ''}`}
-                placeholder="What Smart Factory Actually Means..."
+                className={`input-field-tactile ${errors.title ? 'error' : ''}`}
+                placeholder="e.g. Industry 4.0 Predictive Maintenance Case Study"
               />
               {errors.title && <div className="error-message">{errors.title}</div>}
+            </div>
+
+            {/* Platform Selector Pills */}
+            <div className="form-group full-width">
+              <label>Target Social Network</label>
+              <div className="platform-pills-row">
+                {platformsList.map(p => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => setPlatform(p.id)}
+                    className={`platform-pill-btn ${platform === p.id ? 'active' : ''}`}
+                  >
+                    <span className="pill-dot" style={{ backgroundColor: p.color }}></span>
+                    <span>{p.label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Date */}
             <div className="form-group">
               <label>Publish Date *</label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="input-field"
-              />
+              <div className="input-with-icon">
+                <Calendar size={15} className="input-prefix-icon" />
+                <input
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="input-field-tactile"
+                />
+              </div>
               {errors.date && <div className="error-message">{errors.date}</div>}
             </div>
 
-            {/* Status */}
+            {/* Format / Content Type */}
             <div className="form-group">
-              <label>Post Status</label>
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                className="input-field"
-              >
-                <option value="Draft">🟡 Draft</option>
-                <option value="Ready">🔵 Ready</option>
-                <option value="Scheduled">🔵 Scheduled</option>
-                <option value="Published">🟢 Published</option>
-                <option value="Archived">⚪ Archived</option>
-              </select>
-            </div>
-
-            {/* Platform */}
-            <div className="form-group">
-              <label>Social Platform</label>
-              <select
-                value={platform}
-                onChange={(e) => setPlatform(e.target.value)}
-                className="input-field"
-              >
-                <option value="LinkedIn">LinkedIn</option>
-                <option value="Instagram">Instagram</option>
-                <option value="Facebook">Facebook</option>
-                <option value="X">X (Twitter)</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-
-            {/* Content Type */}
-            <div className="form-group">
-              <label>Content Type</label>
+              <label>Content Format</label>
               <select
                 value={contentType}
                 onChange={(e) => {
                   setContentType(e.target.value);
-                  setErrors({ ...errors, media: null }); // Clear media errors
+                  setErrors({ ...errors, media: null });
                 }}
-                className="input-field"
+                className="filter-select-tactile"
               >
                 <option value="Single Image">Single Image</option>
                 <option value="Carousel">Carousel (PDF/Slides)</option>
@@ -514,9 +512,49 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
               </select>
             </div>
 
-            {/* Creative Upload (Conditional on Content Type) */}
+            {/* Caption (URL Detection active here) */}
+            <div className="form-group full-width">
+              <label style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>Caption & Body Copy</span>
+                <span style={{ fontSize: '0.7rem', color: 'var(--ingsol-secondary)', fontWeight: 600 }}>
+                  <Sparkles size={11} style={{ display: 'inline', marginRight: 3 }} />
+                  Paste any URL to auto-extract preview image
+                </span>
+              </label>
+              <textarea
+                value={caption}
+                onChange={(e) => setCaption(e.target.value)}
+                className="input-field-tactile"
+                placeholder="Write your caption here or paste any article URL (e.g. https://example.com/smart-factory)..."
+                rows="4"
+              />
+            </div>
+
+            {/* Automatic Link Preview Card (If extracted) */}
+            {linkPreviewImage && !singleFilePreview && (
+              <div className="form-group full-width">
+                <div className="link-preview-detected-card">
+                  <div className="detected-badge">
+                    <LinkIcon size={12} /> Auto-Fetched Link Preview
+                  </div>
+                  <div className="detected-content">
+                    <img src={linkPreviewImage} alt="Link Preview" className="detected-img" />
+                    <div className="detected-meta">
+                      <div className="detected-title">
+                        {linkPreviewMetadata?.title || title || 'Web Preview Document'}
+                      </div>
+                      <div className="detected-desc">
+                        {linkPreviewMetadata?.description || 'Image will be pinned onto your desk calendar.'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Creative Upload (Single / Carousel) */}
             {contentType !== 'Text' && (
-              <div className="form-group full-width" style={{ marginTop: '4px' }}>
+              <div className="form-group full-width" style={{ marginTop: '2px' }}>
                 {contentType === 'Carousel' ? (
                   <CarouselUploader 
                     slides={carouselSlides} 
@@ -524,58 +562,46 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
                   />
                 ) : (
                   <div>
-                    <label>Upload Creative ({contentType}) *</label>
+                    <label>Creative Visual Asset ({contentType})</label>
                     {singleFilePreview ? (
-                      <div className="uploaded-preview-container">
+                      <div className="uploaded-preview-container paper-inset-frame">
                         {renderFilePreview()}
                         <div className="uploaded-preview-actions">
                           <button
                             type="button"
-                            className="btn btn-danger"
-                            style={{ padding: '6px' }}
+                            className="btn btn-danger tactile-btn"
+                            style={{ padding: '6px 12px' }}
                             onClick={removeSingleFile}
                             title="Remove file"
                           >
-                            <Trash2 size={14} /> Remove
+                            <Trash2 size={13} /> Remove
                           </button>
                         </div>
                       </div>
-                    ) : linkPreviewImage ? (
-                      <div className="uploaded-preview-container">
-                        <img src={linkPreviewImage} alt="Link Preview" className="uploaded-preview-image" />
-                        <div style={{ position: 'absolute', top: 6, left: 6, zIndex: 1, backgroundColor: 'rgba(15, 23, 42, 0.8)', color: 'white', fontSize: '0.65rem', padding: '2px 6px', borderRadius: 10, fontWeight: 700 }}>
-                          Auto Link Preview
-                        </div>
-                        {isLoadingPreview && (
-                          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.4)', borderRadius: 'var(--radius-sm)' }}>
-                            <span style={{ color: 'white', fontSize: '0.8rem', fontWeight: 600 }}>Updating preview...</span>
-                          </div>
-                        )}
-                      </div>
                     ) : (
                       <div
-                        className="upload-dropzone"
+                        className="upload-dropzone paper-dropzone-tactile"
                         onClick={() => fileInputRef.current.click()}
                         onDragOver={(e) => e.preventDefault()}
                         onDrop={handleSingleFileDrop}
                       >
                         {isLoadingPreview ? (
                           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-                            <div className="spinner" style={{ width: 24, height: 24, border: '3px solid var(--border-light)', borderTopColor: 'var(--color-accent)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
-                            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Fetching link preview...</span>
+                            <div className="spinner" style={{ width: 24, height: 24, border: '3px solid var(--paper-border)', borderTopColor: 'var(--ingsol-primary)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+                            <span style={{ fontSize: '0.82rem', color: 'var(--paper-text-muted)', fontWeight: 600 }}>Extracting web link preview...</span>
                           </div>
                         ) : (
                           <>
                             <Upload className="upload-dropzone-icon" />
                             <div className="upload-dropzone-text">
                               {contentType === 'Video' || contentType === 'Reel'
-                                ? 'Click or drag your video here'
-                                : 'Click or drag images / PDF here'}
+                                ? 'Click or drop video asset here'
+                                : 'Click or drop manual image / PDF here'}
                             </div>
                             <div className="upload-dropzone-sub">
                               {contentType === 'Video' || contentType === 'Reel'
                                 ? 'Supports MP4, MOV, WebM'
-                                : 'Supports PNG, JPG, WebP, PDF · Select multiple images to auto-create a Carousel'}
+                                : 'Supports PNG, JPG, WebP, PDF · Overrides automatic URL preview'}
                             </div>
                           </>
                         )}
@@ -595,24 +621,16 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
               </div>
             )}
 
-            {/* Design / Source URL — accepts Figma, Canva, or any URL */}
-            <div className="form-group full-width" style={{ marginTop: '4px' }}>
+            {/* Design / Source URL */}
+            <div className="form-group full-width">
               <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                Design / Source URL
+                <span>Source / Design File</span>
                 {designUrl && (
-                  <span style={{
-                    fontSize: '0.68rem',
-                    fontWeight: 700,
-                    padding: '1px 7px',
-                    borderRadius: 10,
-                    backgroundColor: designPlatform.color + '22',
-                    color: designPlatform.color,
-                    border: `1px solid ${designPlatform.color}44`
-                  }}>
+                  <span className="badge badge-platform-tactile" style={{ fontSize: '0.65rem' }}>
                     {designPlatform.label}
                   </span>
                 )}
-                <span style={{ marginLeft: 'auto', fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+                <span style={{ marginLeft: 'auto', fontSize: '0.72rem', color: 'var(--paper-text-muted)', fontWeight: 500 }}>
                   Optional
                 </span>
               </label>
@@ -621,7 +639,7 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
                   type="url"
                   value={designUrl}
                   onChange={(e) => setDesignUrl(e.target.value)}
-                  className={`input-field ${errors.designUrl ? 'error' : ''}`}
+                  className={`input-field-tactile ${errors.designUrl ? 'error' : ''}`}
                   placeholder="https://www.figma.com/design/... or canva.com/design/..."
                   style={{ flex: 1 }}
                 />
@@ -630,77 +648,64 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
                     href={designUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="btn"
+                    className="btn btn-secondary tactile-btn"
                     title={`Open in ${designPlatform.label}`}
                     style={{ padding: '0 12px', display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0, textDecoration: 'none' }}
                   >
-                    <ExternalLink size={14} />
+                    <ExternalLink size={13} />
                   </a>
                 )}
               </div>
               {errors.designUrl && <div className="error-message">{errors.designUrl}</div>}
-              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: 3 }}>
-                Figma, Canva, Adobe Express, Google Drive, or any website URL
-              </div>
-            </div>
-
-            {/* Published URL */}
-            <div className="form-group full-width">
-              <label>Published Post URL (Optional)</label>
-              <input
-                type="url"
-                value={publishedUrl}
-                onChange={(e) => setPublishedUrl(e.target.value)}
-                className={`input-field ${errors.publishedUrl ? 'error' : ''}`}
-                placeholder="https://www.linkedin.com/feed/update/..."
-              />
-              {errors.publishedUrl && <div className="error-message">{errors.publishedUrl}</div>}
-            </div>
-
-            {/* Caption */}
-            <div className="form-group full-width">
-              <label>Caption / Post Text</label>
-              <textarea
-                value={caption}
-                onChange={(e) => setCaption(e.target.value)}
-                className="input-field"
-                placeholder="Type your social media caption here..."
-                rows="4"
-              />
             </div>
 
             {/* Internal Notes */}
             <div className="form-group full-width">
-              <label>Internal Notes</label>
+              <label>Internal Team Notes</label>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="input-field"
-                placeholder="Add private team notes, approval tasks..."
+                className="input-field-tactile"
+                placeholder="Review approvals, campaign targets, production instructions..."
                 rows="2"
               />
             </div>
 
             {/* Tags */}
             <div className="form-group full-width">
-              <label>Tags (Comma separated)</label>
+              <label>Campaign Tags (Comma separated)</label>
               <input
                 type="text"
                 value={tagsInput}
                 onChange={(e) => setTagsInput(e.target.value)}
-                className="input-field"
-                placeholder="Smart Factory, MES, Industry 4.0"
+                className="input-field-tactile"
+                placeholder="Smart Factory, MES, Automation, Industry 4.0"
               />
             </div>
 
           </div>
         </div>
 
-        <div className="modal-footer">
-          <button className="btn" onClick={onClose}>Cancel</button>
-          <button className="btn btn-primary" onClick={handleSave}>
-            <FileCheck size={16} /> Save Post
+        {/* Modal Footer with Tactile Action Buttons */}
+        <div className="modal-footer paper-sheet-footer">
+          <button className="btn btn-secondary tactile-btn" onClick={onClose}>
+            Cancel
           </button>
+          
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button 
+              className="btn btn-secondary tactile-btn" 
+              onClick={() => handleSave('Draft')}
+            >
+              Save Draft
+            </button>
+            <button 
+              className="btn btn-primary tactile-action-btn" 
+              onClick={() => handleSave(status === 'Draft' ? 'Scheduled' : status)}
+            >
+              {isEditMode ? 'Update Post' : 'Schedule Post'}
+            </button>
+          </div>
         </div>
       </div>
     </div>

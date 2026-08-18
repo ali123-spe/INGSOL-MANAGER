@@ -1,54 +1,92 @@
 /* src/index.css */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap');
+
 :root {
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
-  --font-display: 'Outfit', var(--font-sans);
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Space Grotesk', var(--font-sans);
   
-  /* Slate Design System (Notion/Linear Inspired) */
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8fafc;
-  --bg-tertiary: #f1f5f9;
-  
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
-  
-  --border-light: #e2e8f0;
-  --border-dark: #cbd5e1;
-  
-  /* Statuses */
+  /* INGSOL Brand Palette */
+  --ingsol-primary: #024791;
+  --ingsol-secondary: #0C86D4;
+  --ingsol-accent: #34C1EE;
+  --ingsol-dark-navy: #071426;
+  --ingsol-navy-surface: #0c1c33;
+  --ingsol-neutral: #545454;
+
+  /* Physical Desk & Paper Planner Tones */
+  --desk-surface: #e9e3d5;
+  --desk-edge: #d8cfbe;
+  --paper-bg: #faf7f0;
+  --paper-card: #ffffff;
+  --paper-card-warm: #fffefb;
+  --paper-border: #e2dac9;
+  --paper-line: rgba(180, 168, 145, 0.4);
+  --paper-text-main: #1e242c;
+  --paper-text-muted: #647082;
+
+  /* Leather Cover Tones (Sidebar) */
+  --leather-base: #071426;
+  --leather-gradient: linear-gradient(180deg, #091a30 0%, #061222 100%);
+  --leather-stitch: rgba(12, 134, 212, 0.25);
+  --leather-highlight: rgba(255, 255, 255, 0.07);
+  --leather-shadow: rgba(0, 0, 0, 0.5);
+
+  /* Status Colors */
   --color-draft: #eab308;
   --bg-draft: #fef9c3;
-  --border-draft: #fef08a;
+  --border-draft: #fde047;
 
-  --color-ready: #6366f1;
-  --bg-ready: #e0e7ff;
-  --border-ready: #c7d2fe;
+  --color-ready: #0C86D4;
+  --bg-ready: #e0f2fe;
+  --border-ready: #7dd3fc;
 
-  --color-scheduled: #3b82f6;
+  --color-scheduled: #024791;
   --bg-scheduled: #dbeafe;
-  --border-scheduled: #bfdbfe;
+  --border-scheduled: #93c5fd;
 
-  --color-published: #22c55e;
+  --color-published: #16a34a;
   --bg-published: #dcfce7;
-  --border-published: #bbf7d0;
+  --border-published: #86efac;
 
   --color-archived: #64748b;
   --bg-archived: #f1f5f9;
-  --border-archived: #e2e8f0;
+  --border-archived: #cbd5e1;
 
-  /* Accent */
-  --color-accent: #0f172a;
-  --color-accent-hover: #1e293b;
-  --color-accent-light: #f1f5f9;
+  /* Physical 3D Skeuomorphic Shadows */
+  --shadow-paper-layer: 
+    0 1px 1px rgba(0,0,0,0.08), 
+    0 4px 12px rgba(45,35,20,0.06), 
+    0 16px 32px rgba(45,35,20,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.9);
   
-  /* Elevation */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+  --shadow-card-pinned:
+    0 1px 2px rgba(0, 0, 0, 0.08),
+    0 6px 14px rgba(35, 25, 10, 0.12),
+    0 1px 0 rgba(255, 255, 255, 0.9) inset;
+    
+  --shadow-card-hover:
+    0 2px 4px rgba(0, 0, 0, 0.08),
+    0 12px 24px rgba(35, 25, 10, 0.18),
+    0 1px 0 rgba(255, 255, 255, 0.9) inset;
 
+  --shadow-metal-plate:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+    0 2px 5px rgba(0, 0, 0, 0.25);
+
+  --shadow-embossed-inset:
+    inset 0 2px 4px rgba(0, 0, 0, 0.35),
+    0 1px 0 rgba(255, 255, 255, 0.08);
+
+  --shadow-button-press:
+    inset 0 2px 4px rgba(0,0,0,0.25),
+    0 1px 0 rgba(255,255,255,0.6);
+
+  --radius-xs: 4px;
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 14px;
+  --radius-xl: 18px;
 }
 
 * {
@@ -60,12 +98,15 @@
 }
 
 body {
-  background-color: var(--bg-secondary);
-  color: var(--text-primary);
+  background-color: var(--desk-surface);
+  color: var(--paper-text-main);
   font-family: var(--font-sans);
   overflow: hidden;
   height: 100vh;
   width: 100vw;
+  background-image: 
+    radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.4) 0%, rgba(0,0,0,0.05) 100%),
+    linear-gradient(180deg, #ede7db 0%, #dfd6c4 100%);
 }
 
 #root {
@@ -79,25 +120,32 @@ button, input, select, textarea {
   color: inherit;
 }
 
-/* Scrollbar styles */
+/* Tactile scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--border-dark);
+  background: rgba(0, 0, 0, 0.04);
   border-radius: 4px;
 }
 
+::-webkit-scrollbar-thumb {
+  background: #c7beaf;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
+  background: #aca292;
 }
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+@keyframes pinDrop {
+  0% { transform: translateY(-8px) scale(1.1); opacity: 0.7; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
 }

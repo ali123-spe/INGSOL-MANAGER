@@ -1,7 +1,7 @@
 // src/App.jsx
 import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
-import CalendarView from './components/CalendarView';
+import CalendarView, { PostCardThumbnail, PlatformIcon } from './components/CalendarView';
 import PostModal from './components/PostModal';
 import PostDetailsDrawer from './components/PostDetailsDrawer';
 import MediaLibraryView from './components/MediaLibraryView';
@@ -15,13 +15,9 @@ import {
 import { 
   Plus, 
   Search, 
-  HelpCircle,
   FileDown,
   FileUp,
-  RotateCcw,
-  Sliders,
-  CheckCircle2,
-  AlertCircle
+  Sliders
 } from 'lucide-react';
 import './App.css';
 
@@ -29,8 +25,8 @@ export default function App() {
   const [posts, setPosts] = useState([]);
   
   // Navigation & Filtering
-  const [activeView, setActiveView] = useState('calendar'); // calendar | all-posts | drafts | ...
-  const [currentDate, setCurrentDate] = useState(new Date(2026, 7, 8)); // August 8, 2026 — local time (avoids UTC parse shift)
+  const [activeView, setActiveView] = useState('calendar');
+  const [currentDate, setCurrentDate] = useState(new Date(2026, 7, 8)); // August 8, 2026
   const [searchQuery, setSearchQuery] = useState('');
   
   // Toolbar dropdown filters
@@ -44,8 +40,8 @@ export default function App() {
   const [modalDatePreset, setModalDatePreset] = useState('');
   const [editingPost, setEditingPost] = useState(null);
 
-  // Settings mock states
-  const [workspaceName, setWorkspaceName] = useState('Antigravity Marketing');
+  // Settings states
+  const [workspaceName, setWorkspaceName] = useState('INGSOL Industrial Marketing');
   const [linkedPlatforms, setLinkedPlatforms] = useState({
     LinkedIn: true,
     Instagram: true,
@@ -73,7 +69,6 @@ export default function App() {
       const allPosts = await getAllPosts();
       setPosts(allPosts);
       
-      // Keep details drawer updated if the active post was modified
       if (selectedPost) {
         const updated = allPosts.find(p => p.id === selectedPost.id);
         if (updated) setSelectedPost(updated);
@@ -83,7 +78,7 @@ export default function App() {
     }
   };
 
-  // Category counts builder for Sidebar
+  // Category counts builder for Sidebar & Top Status Plates
   const getCounts = () => {
     const counts = {
       Draft: 0,
@@ -115,7 +110,6 @@ export default function App() {
 
       if (e.key.toLowerCase() === 'n') {
         e.preventDefault();
-        // Use local-time date to avoid toISOString() UTC shift
         const today = new Date();
         const yyyy = today.getFullYear();
         const mm = String(today.getMonth() + 1).padStart(2, '0');
@@ -180,7 +174,6 @@ export default function App() {
 
   // Duplicate Post logic
   const handleDuplicatePost = (post) => {
-    // Copy properties: Reset status to Draft, require new date, DO NOT copy published URL
     const duplicateData = {
       title: `${post.title} (Repurposed)`,
       platform: post.platform,
@@ -189,10 +182,11 @@ export default function App() {
       caption: post.caption || '',
       notes: post.notes || '',
       tags: post.tags ? [...post.tags] : [],
-      figmaUrl: post.figmaUrl || '',
+      designUrl: post.designUrl || post.figmaUrl || '',
+      figmaUrl: post.designUrl || post.figmaUrl || '',
       publishedUrl: '',
-      // Reference existing slide databases
       mediaId: post.mediaId || null,
+      linkPreviewImage: post.linkPreviewImage || '',
       carouselSlides: post.carouselSlides ? post.carouselSlides.map(slide => ({
         ...slide,
         id: `slide_dup_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`
@@ -200,7 +194,7 @@ export default function App() {
     };
 
     setEditingPost(duplicateData);
-    setModalDatePreset(''); // Reset date to force date-picker
+    setModalDatePreset('');
     setIsPostModalOpen(true);
   };
 
@@ -219,18 +213,15 @@ export default function App() {
   // Global filters & searching logic
   const getFilteredPosts = () => {
     return posts.filter(post => {
-      // Sidebar selection filtering
       if (activeView === 'drafts' && post.status !== 'Draft') return false;
       if (activeView === 'scheduled' && post.status !== 'Scheduled') return false;
       if (activeView === 'published' && post.status !== 'Published') return false;
       if (activeView === 'archive' && post.status !== 'Archived') return false;
       
-      // Dropdown Toolbar Filters
       if (filterPlatform !== 'All' && post.platform !== filterPlatform) return false;
       if (filterStatus !== 'All' && post.status !== filterStatus) return false;
       if (filterContentType !== 'All' && post.contentType !== filterContentType) return false;
 
-      // Global Search string filter
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         const matchesTitle = (post.title || '').toLowerCase().includes(q);
@@ -249,18 +240,16 @@ export default function App() {
     });
   };
 
-  // Backup DB logic (JSON export/import)
   const handleExportDB = () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(posts, null, 2));
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `content_calendar_backup_${new Date().toISOString().split('T')[0]}.json`);
+    downloadAnchor.setAttribute("download", `ingsol_manager_backup_${new Date().toISOString().split('T')[0]}.json`);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
   };
 
-  // Clear filters helper
   const resetFilters = () => {
     setFilterPlatform('All');
     setFilterStatus('All');
@@ -291,101 +280,90 @@ export default function App() {
       
       case 'all-posts':
         return (
-          <div className="content-viewport" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-light)', paddingBottom: '12px' }}>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.2rem' }}>All Scheduled Postings</h2>
-              <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 700 }}>
-                {filteredPostsList.length} total posts
+          <div className="desk-planner-container" style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: 20 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--paper-border)', paddingBottom: '14px' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.2rem', color: 'var(--ingsol-dark-navy)' }}>
+                Master Editorial Dispatch
+              </h2>
+              <span style={{ fontSize: '0.78rem', color: 'var(--paper-text-muted)', fontWeight: 700 }}>
+                {filteredPostsList.length} scheduled & drafted posts
               </span>
             </div>
             
-            {filteredPostsList.length > 0 ? (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 16 }}>
-                {filteredPostsList.map(post => (
-                  <div
-                    key={post.id}
-                    className="post-card"
-                    onClick={() => setSelectedPost(post)}
-                    style={{ padding: '12px' }}
-                  >
-                    {/* Render visual preview cover slide/image */}
-                    <div className="card-thumbnail-container" style={{ aspectRatio: '16 / 10' }}>
-                      {post.mediaId ? (
-                        <img 
-                          src="" // Will be resolved dynamically by subcomponent
-                          alt="" 
-                          style={{ display: 'none' }} 
+            <div style={{ flex: 1, overflowY: 'auto', paddingTop: 16 }}>
+              {filteredPostsList.length > 0 ? (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 16 }}>
+                  {filteredPostsList.map(post => (
+                    <div
+                      key={post.id}
+                      className="post-card pinned-paper-card"
+                      onClick={() => setSelectedPost(post)}
+                      style={{ padding: '10px' }}
+                    >
+                      <div className="card-metal-pin">
+                        <div className="pin-head"></div>
+                        <div className="pin-shine"></div>
+                        <div className="pin-shadow"></div>
+                      </div>
+
+                      <div className="card-thumbnail-container" style={{ aspectRatio: '16 / 10' }}>
+                        <PostCardThumbnail 
+                          mediaId={post.mediaId} 
+                          linkPreviewImage={post.linkPreviewImage} 
+                          title={post.title} 
+                          contentType={post.contentType} 
                         />
-                      ) : null}
-                      <CalendarView posts={[]} currentDate={new Date()} onUpdatePostDate={() => {}} /> {/* Dummy element placeholder or let's use the PostCardThumbnail inside CalendarView */}
-                      {/* Let's import the PostCardThumbnail manually here for visual fidelity */}
-                      <div className="card-thumbnail-container">
-                        {post.contentType === 'Carousel' ? (
-                          <div style={{ position: 'absolute', top: 6, right: 6, zIndex: 1, backgroundColor: 'rgba(15, 23, 42, 0.8)', color: 'white', fontSize: '0.6rem', padding: '2px 6px', borderRadius: 10, fontWeight: 700 }}>
-                            {post.carouselSlides?.length || 0} slides
+                      </div>
+                      
+                      <div className="card-info" style={{ marginTop: 8, gap: 4 }}>
+                        <div className="card-title" style={{ fontSize: '0.85rem', fontWeight: 800 }}>{post.title}</div>
+                        <div className="card-meta" style={{ fontSize: '0.72rem' }}>
+                          <div className="card-platform">
+                            <PlatformIcon platform={post.platform} size={11} />
+                            <span>📅 {post.date}</span>
                           </div>
-                        ) : null}
-                        {/* We use standard HTML5 rendering or fallback inside the card */}
-                        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--bg-tertiary)' }}>
-                          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                            {post.contentType} Post
+                          <span className={`status-pill status-${post.status.toLowerCase()}`}>
+                            {post.status}
                           </span>
                         </div>
                       </div>
                     </div>
-                    
-                    <div className="card-info" style={{ marginTop: 10, gap: 4 }}>
-                      <div className="card-title" style={{ fontSize: '0.85rem', fontWeight: 800 }}>{post.title}</div>
-                      <div className="card-meta" style={{ fontSize: '0.72rem' }}>
-                        <span>📅 {post.date}</span>
-                        <span style={{ display: 'inline-flex', alignItems: 'center' }}>
-                          <span className={`card-status-dot status-${post.status.toLowerCase()}`}></span>
-                          {post.status}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="empty-state">
-                <Sliders className="empty-state-icon" />
-                <div className="empty-state-title">No posts match filters</div>
-                <div className="empty-state-text">Try resetting filters to discover scheduled posts.</div>
-                <button className="btn" onClick={resetFilters}>Clear Filters</button>
-              </div>
-            )}
+                  ))}
+                </div>
+              ) : (
+                <div className="empty-state">
+                  <Sliders className="empty-state-icon" />
+                  <div className="empty-state-title">No posts match filters</div>
+                  <div className="empty-state-text">Try resetting filters to discover scheduled posts.</div>
+                  <button className="btn btn-secondary tactile-btn" onClick={resetFilters}>Clear Filters</button>
+                </div>
+              )}
+            </div>
           </div>
         );
       
       case 'media-library':
-        return (
-          <div className="content-viewport">
-            <MediaLibraryView posts={posts} onPostClick={setSelectedPost} />
-          </div>
-        );
+        return <MediaLibraryView posts={posts} onPostClick={setSelectedPost} />;
       
       case 'carousels':
-        return (
-          <div className="content-viewport">
-            <CarouselLibraryView posts={posts} onPostClick={setSelectedPost} />
-          </div>
-        );
+        return <CarouselLibraryView posts={posts} onPostClick={setSelectedPost} />;
 
       case 'platforms':
         return (
-          <div className="content-viewport" style={{ maxWidth: 600, display: 'flex', flexDirection: 'column', gap: 24 }}>
+          <div className="desk-planner-container" style={{ maxWidth: 650, margin: '0 auto', padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
             <div>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.25rem' }}>Social Platform Channels</h2>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: 4 }}>
-                Configure which social networks appear in the content dropdown picker.
+              <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.25rem', color: 'var(--ingsol-dark-navy)' }}>
+                Industrial Social Network Integrations
+              </h2>
+              <p style={{ fontSize: '0.84rem', color: 'var(--paper-text-muted)', marginTop: 4 }}>
+                Enable or disable channels available in your publishing manifests.
               </p>
             </div>
 
-            <div style={{ backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-md)', padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ backgroundColor: 'var(--paper-card)', border: '1px solid var(--paper-border)', borderRadius: 'var(--radius-sm)', padding: 18, display: 'flex', flexDirection: 'column', gap: 14 }}>
               {Object.keys(linkedPlatforms).map(plat => (
-                <div key={plat} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 12, borderBottom: '1px solid var(--border-light)' }}>
-                  <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>{plat} Integration</span>
+                <div key={plat} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 10, borderBottom: '1px solid var(--paper-line)' }}>
+                  <span style={{ fontWeight: 700, fontSize: '0.88rem' }}>{plat} Network</span>
                   <label className="switch" style={{ position: 'relative', display: 'inline-block', width: 44, height: 24 }}>
                     <input 
                       type="checkbox" 
@@ -395,12 +373,14 @@ export default function App() {
                     />
                     <span style={{
                       position: 'absolute', cursor: 'pointer', top: 0, left: 0, right: 0, bottom: 0, 
-                      backgroundColor: linkedPlatforms[plat] ? 'var(--color-published)' : 'var(--border-dark)', 
-                      transition: '.2s', borderRadius: 24
+                      backgroundColor: linkedPlatforms[plat] ? 'var(--ingsol-primary)' : '#c7bca9', 
+                      transition: '.2s', borderRadius: 24,
+                      boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.3)'
                     }}>
                       <span style={{
                         position: 'absolute', content: '""', height: 16, width: 16, left: linkedPlatforms[plat] ? 24 : 4, bottom: 4, 
-                        backgroundColor: 'white', transition: '.2s', borderRadius: '50%'
+                        backgroundColor: 'white', transition: '.2s', borderRadius: '50%',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
                       }}></span>
                     </span>
                   </label>
@@ -412,39 +392,41 @@ export default function App() {
 
       case 'settings':
         return (
-          <div className="content-viewport" style={{ maxWidth: 600, display: 'flex', flexDirection: 'column', gap: 24 }}>
+          <div className="desk-planner-container" style={{ maxWidth: 650, margin: '0 auto', padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
             <div>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.25rem' }}>Workspace Settings</h2>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: 4 }}>
-                Configure global calendar values and manage local databases.
+              <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.25rem', color: 'var(--ingsol-dark-navy)' }}>
+                Workspace & Archive Settings
+              </h2>
+              <p style={{ fontSize: '0.84rem', color: 'var(--paper-text-muted)', marginTop: 4 }}>
+                Configure organization identifiers and manage local persistent storage.
               </p>
             </div>
 
-            <div style={{ backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-md)', padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ backgroundColor: 'var(--paper-card)', border: '1px solid var(--paper-border)', borderRadius: 'var(--radius-sm)', padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div className="form-group">
                 <label>Workspace / Company Name</label>
                 <input
                   type="text"
                   value={workspaceName}
                   onChange={(e) => setWorkspaceName(e.target.value)}
-                  className="input-field"
+                  className="input-field-tactile"
                 />
               </div>
 
-              <div style={{ height: 1, backgroundColor: 'var(--border-light)', margin: '10px 0' }} />
+              <div style={{ height: 1, backgroundColor: 'var(--paper-border)', margin: '4px 0' }} />
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <label>Local Data Backup</label>
-                <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                  All scheduling creative slides and post structures are saved completely inside your browser's persistent IndexedDB database. You can export/import backups locally.
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <label>Offline Database Backup</label>
+                <p style={{ fontSize: '0.78rem', color: 'var(--paper-text-muted)', lineHeight: 1.4 }}>
+                  All social posts, creative assets, and auto-fetched web previews are preserved in your local browser storage. You can export a snapshot backup at any time.
                 </p>
                 
-                <div style={{ display: 'flex', gap: 12, marginTop: 6 }}>
-                  <button className="btn" onClick={handleExportDB}>
+                <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
+                  <button className="btn btn-primary tactile-action-btn" onClick={handleExportDB}>
                     <FileDown size={14} /> Export Backup JSON
                   </button>
                   
-                  <button className="btn" disabled style={{ opacity: 0.5, cursor: 'not-allowed' }}>
+                  <button className="btn btn-secondary tactile-btn" disabled style={{ opacity: 0.5, cursor: 'not-allowed' }}>
                     <FileUp size={14} /> Import Backup
                   </button>
                 </div>
@@ -465,7 +447,6 @@ export default function App() {
         activeView={activeView} 
         setActiveView={(view) => {
           setActiveView(view);
-          // Auto reset filters when changing sidebar categories to avoid confusion
           resetFilters();
         }} 
         counts={getCounts()} 
@@ -474,20 +455,22 @@ export default function App() {
       {/* Main Panel */}
       <main className="main-panel">
         
-        {/* Top Header bar */}
-        <header className="top-bar">
+        {/* Top Header bar with Physical Industrial Header */}
+        <header className="top-bar industrial-header">
           <div className="top-bar-left">
-            <h1 className="view-title">
-              {activeView === 'calendar' ? 'Content Calendar' : 
-               activeView === 'all-posts' ? 'All Posts' : 
-               activeView === 'media-library' ? 'Media Library' : 
-               activeView === 'carousels' ? 'Carousel Library' : 
-               activeView.charAt(0).toUpperCase() + activeView.slice(1)}
-            </h1>
+            <div className="view-title-plate">
+              <h1 className="view-title">
+                {activeView === 'calendar' ? 'Content Calendar' : 
+                 activeView === 'all-posts' ? 'All Posts' : 
+                 activeView === 'media-library' ? 'Media Library' : 
+                 activeView === 'carousels' ? 'Carousel Library' : 
+                 activeView.charAt(0).toUpperCase() + activeView.slice(1)}
+              </h1>
+            </div>
 
             {/* Global Search */}
-            <div className="search-container">
-              <Search className="search-icon" />
+            <div className="search-container tactile-search">
+              <Search className="search-icon" size={15} />
               <input
                 id="global-search-input"
                 type="text"
@@ -500,11 +483,57 @@ export default function App() {
           </div>
 
           <div className="top-bar-right">
-            {/* Quick add button */}
+            {/* 4 Physical Status Plates */}
+            <div className="status-plates-row">
+              <div 
+                className={`status-plate plate-draft ${filterStatus === 'Draft' ? 'active' : ''}`}
+                onClick={() => setFilterStatus(filterStatus === 'Draft' ? 'All' : 'Draft')}
+                title="Filter by Drafts"
+              >
+                <div className="plate-screw top-left"></div>
+                <div className="plate-screw top-right"></div>
+                <span className="plate-count">{getCounts().Draft}</span>
+                <span className="plate-label">Drafts</span>
+              </div>
+
+              <div 
+                className={`status-plate plate-scheduled ${filterStatus === 'Scheduled' ? 'active' : ''}`}
+                onClick={() => setFilterStatus(filterStatus === 'Scheduled' ? 'All' : 'Scheduled')}
+                title="Filter by Scheduled"
+              >
+                <div className="plate-screw top-left"></div>
+                <div className="plate-screw top-right"></div>
+                <span className="plate-count">{getCounts().Scheduled}</span>
+                <span className="plate-label">Scheduled</span>
+              </div>
+
+              <div 
+                className={`status-plate plate-published ${filterStatus === 'Published' ? 'active' : ''}`}
+                onClick={() => setFilterStatus(filterStatus === 'Published' ? 'All' : 'Published')}
+                title="Filter by Published"
+              >
+                <div className="plate-screw top-left"></div>
+                <div className="plate-screw top-right"></div>
+                <span className="plate-count">{getCounts().Published}</span>
+                <span className="plate-label">Published</span>
+              </div>
+
+              <div 
+                className={`status-plate plate-archived ${filterStatus === 'Archived' ? 'active' : ''}`}
+                onClick={() => setFilterStatus(filterStatus === 'Archived' ? 'All' : 'Archived')}
+                title="Filter by Archived"
+              >
+                <div className="plate-screw top-left"></div>
+                <div className="plate-screw top-right"></div>
+                <span className="plate-count">{getCounts().Archived}</span>
+                <span className="plate-label">Archived</span>
+              </div>
+            </div>
+
+            {/* Quick add button (Physical tactile button) */}
             <button 
-              className="btn btn-primary"
+              className="btn btn-primary tactile-action-btn"
               onClick={() => {
-                // Use local-time date to avoid toISOString() UTC shift
                 const today = new Date();
                 const yyyy = today.getFullYear();
                 const mm = String(today.getMonth() + 1).padStart(2, '0');
@@ -512,22 +541,22 @@ export default function App() {
                 handleAddPostClick(`${yyyy}-${mm}-${dd}`);
               }}
             >
-              <Plus size={16} /> Add Post <span style={{ opacity: 0.5, fontSize: '0.68rem', marginLeft: 4, borderLeft: '1px solid rgba(255,255,255,0.3)', paddingLeft: 4 }}>N</span>
+              <Plus size={16} /> Add Post <span className="key-hint">N</span>
             </button>
           </div>
         </header>
 
         {/* Dropdown Filters Sub-bar */}
         {(activeView === 'calendar' || activeView === 'all-posts' || activeView === 'drafts' || activeView === 'scheduled' || activeView === 'published' || activeView === 'archive') && (
-          <div className="filters-bar">
+          <div className="filters-bar planner-toolbar">
             <div className="filters-left">
               {/* Platform Filter */}
-              <div className="filter-group">
+              <div className="filter-group-tactile">
                 <span className="filter-label">Platform:</span>
                 <select 
                   value={filterPlatform} 
                   onChange={(e) => setFilterPlatform(e.target.value)}
-                  className="filter-select"
+                  className="filter-select-tactile"
                 >
                   <option value="All">All Platforms</option>
                   <option value="LinkedIn">LinkedIn</option>
@@ -539,12 +568,12 @@ export default function App() {
               </div>
 
               {/* Status Filter */}
-              <div className="filter-group">
+              <div className="filter-group-tactile">
                 <span className="filter-label">Status:</span>
                 <select 
                   value={filterStatus} 
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className="filter-select"
+                  className="filter-select-tactile"
                 >
                   <option value="All">All Statuses</option>
                   <option value="Draft">Draft</option>
@@ -556,12 +585,12 @@ export default function App() {
               </div>
 
               {/* Content Type Filter */}
-              <div className="filter-group">
+              <div className="filter-group-tactile">
                 <span className="filter-label">Type:</span>
                 <select 
                   value={filterContentType} 
                   onChange={(e) => setFilterContentType(e.target.value)}
-                  className="filter-select"
+                  className="filter-select-tactile"
                 >
                   <option value="All">All Formats</option>
                   <option value="Single Image">Single Image</option>
@@ -576,28 +605,24 @@ export default function App() {
               {/* Clear filters badge if any are active */}
               {(filterPlatform !== 'All' || filterStatus !== 'All' || filterContentType !== 'All' || searchQuery !== '') && (
                 <button 
-                  className="btn" 
+                  className="btn btn-reset-filters" 
                   onClick={resetFilters}
-                  style={{ padding: '2px 8px', fontSize: '0.72rem', borderRadius: 12, backgroundColor: 'var(--color-accent-light)' }}
                 >
                   Reset filters
                 </button>
               )}
             </div>
 
-            {/* Dashboard metrics compact */}
-            <div style={{ display: 'flex', gap: 14, fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 700 }}>
-              <span>{posts.length} Posts</span>
-              <span>•</span>
-              <span style={{ color: 'var(--color-published)' }}>{getCounts().Published} Published</span>
-              <span>•</span>
-              <span style={{ color: 'var(--color-scheduled)' }}>{getCounts().Scheduled} Scheduled</span>
+            {/* Total items badge */}
+            <div className="planner-metrics-indicator">
+              <span className="dot-live"></span>
+              <span>{filteredPostsList.length} Active in View</span>
             </div>
           </div>
         )}
 
-        {/* Dynamic view injection */}
-        <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+        {/* Dynamic view injection inside desk workspace */}
+        <div className="workspace-desk-viewport" style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
           {renderActiveView()}
         </div>
 

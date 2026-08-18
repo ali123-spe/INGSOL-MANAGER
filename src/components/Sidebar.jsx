@@ -10,8 +10,7 @@ import {
   Image,
   Sliders,
   Settings,
-  Globe,
-  Radio
+  Globe
 } from 'lucide-react';
 
 export default function Sidebar({ activeView, setActiveView, counts }) {
@@ -34,18 +33,33 @@ export default function Sidebar({ activeView, setActiveView, counts }) {
   const sections = ['Workspace', 'Library', 'Settings'];
 
   return (
-    <aside className="sidebar">
+    <aside className="sidebar leather-panel">
+      {/* Outer stitched line */}
+      <div className="leather-stitch-line"></div>
+
       <div className="sidebar-header">
         <div className="sidebar-logo">
-          <div className="sidebar-logo-icon"></div>
-          <span>INGSOL MANAGER </span>
+          <div className="sidebar-logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="logo-svg">
+              <rect x="2" y="2" width="20" height="20" rx="5" fill="#024791" />
+              <path d="M7 17V7L17 17V7" stroke="#34C1EE" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+          <div className="sidebar-brand-text">
+            <span className="brand-ingsol">INGSOL</span>
+            <span className="brand-manager">MANAGER</span>
+          </div>
         </div>
+        <div className="planner-crease"></div>
       </div>
 
       <div className="sidebar-menu">
         {sections.map(section => (
           <div key={section} className="sidebar-section">
-            <h3 className="sidebar-section-title">{section}</h3>
+            <div className="sidebar-section-header">
+              <span className="sidebar-section-title">{section}</span>
+              <div className="section-emboss-line"></div>
+            </div>
             {menuItems
               .filter(item => item.section === section)
               .map(item => {
@@ -62,20 +76,30 @@ export default function Sidebar({ activeView, setActiveView, counts }) {
                   <button
                     key={item.id}
                     onClick={() => setActiveView(item.id)}
-                    className={`sidebar-item ${isActive ? 'active' : ''}`}
+                    className={`sidebar-item ${isActive ? 'active metal-plate' : 'embossed-item'}`}
                   >
                     <div className="sidebar-item-left">
-                      <Icon size={16} />
-                      <span>{item.label}</span>
+                      <div className="item-icon-wrapper">
+                        <Icon size={16} />
+                      </div>
+                      <span className="item-label">{item.label}</span>
                     </div>
                     {item.countKey && count > 0 && (
-                      <span className="sidebar-count">{count}</span>
+                      <span className={`sidebar-count ${isActive ? 'count-active' : ''}`}>{count}</span>
                     )}
                   </button>
                 );
               })}
           </div>
         ))}
+      </div>
+
+      {/* Bottom leather branding / stamp */}
+      <div className="sidebar-footer">
+        <div className="leather-stamp">
+          <div className="stamp-ring"></div>
+          <span>INDUSTRIAL PLANNER</span>
+        </div>
       </div>
     </aside>
   );
