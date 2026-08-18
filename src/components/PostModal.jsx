@@ -126,6 +126,16 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
     };
   }, [carouselSlides]);
 
+  const ensureAbsoluteUrl = (url) => {
+    if (!url) return '';
+    const trimmed = url.trim();
+    if (!trimmed) return '';
+    if (/^https?:\/\//i.test(trimmed)) {
+      return trimmed;
+    }
+    return `https://${trimmed}`;
+  };
+
   // Form validations
   const validateForm = () => {
     const newErrors = {};
@@ -139,18 +149,20 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
     }
 
     // Design URL: validate it's a real URL if provided (any platform allowed)
-    if (designUrl.trim()) {
+    const formattedDesign = ensureAbsoluteUrl(designUrl);
+    if (formattedDesign) {
       try {
-        new URL(designUrl);
+        new URL(formattedDesign);
       } catch (err) {
         newErrors.designUrl = 'Please enter a valid URL (e.g. https://www.figma.com/design/... or canva.com/design/...)';
       }
     }
 
     // Published URL validation
-    if (publishedUrl.trim()) {
+    const formattedPublished = ensureAbsoluteUrl(publishedUrl);
+    if (formattedPublished) {
       try {
-        new URL(publishedUrl);
+        new URL(formattedPublished);
       } catch (err) {
         newErrors.publishedUrl = 'Please enter a valid published post URL';
       }
@@ -296,6 +308,9 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
   const handleSave = () => {
     if (!validateForm()) return;
 
+    const finalDesignUrl = ensureAbsoluteUrl(designUrl);
+    const finalPublishedUrl = ensureAbsoluteUrl(publishedUrl);
+
     // Build the post object
     const postData = {
       id: isEditMode ? post.id : `post_${Date.now()}`,
@@ -306,9 +321,9 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
       status,
       caption,
       notes,
-      designUrl: designUrl.trim(),   // new canonical field
-      figmaUrl: designUrl.trim(),    // backward compat for existing code that reads figmaUrl
-      publishedUrl,
+      designUrl: finalDesignUrl,   // new canonical field
+      figmaUrl: finalDesignUrl,    // backward compat for existing code that reads figmaUrl
+      publishedUrl: finalPublishedUrl,
       tags: tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0),
       createdAt: isEditMode ? post.createdAt : new Date().toISOString()
     };

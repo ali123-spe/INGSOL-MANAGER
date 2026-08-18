@@ -178,11 +178,19 @@ export default function PostDetailsDrawer({
 
           {/* Quick Actions / External Links */}
           <div className="details-links-row">
-            <button 
+            <a 
               className={`btn btn-primary btn-link-action`}
-              disabled={!designUrl}
-              onClick={handleDesignRedirect}
-              style={{ opacity: designUrl ? 1 : 0.4, cursor: designUrl ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', gap: 6 }}
+              href={designUrl || undefined}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ 
+                opacity: designUrl ? 1 : 0.4, 
+                pointerEvents: designUrl ? 'auto' : 'none', 
+                display: 'inline-flex', 
+                alignItems: 'center', 
+                gap: 6,
+                textDecoration: 'none'
+              }}
               title={designUrl ? `Open the editable file in ${designPlatform.label}` : 'No design URL stored'}
             >
               {designUrl && (
@@ -197,7 +205,7 @@ export default function PostDetailsDrawer({
                 </span>
               )}
               Edit in {designUrl ? designPlatform.label : 'Design Tool'} <ExternalLink size={14} />
-            </button>
+            </a>
 
             {designUrl && (
               <button
@@ -210,15 +218,23 @@ export default function PostDetailsDrawer({
               </button>
             )}
 
-            <button 
+            <a 
               className={`btn btn-link-action`}
-              disabled={!post.publishedUrl}
-              onClick={handlePublishedRedirect}
-              style={{ opacity: post.publishedUrl ? 1 : 0.4, cursor: post.publishedUrl ? 'pointer' : 'not-allowed' }}
+              href={post.publishedUrl || undefined}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ 
+                opacity: post.publishedUrl ? 1 : 0.4, 
+                pointerEvents: post.publishedUrl ? 'auto' : 'none',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                textDecoration: 'none'
+              }}
               title={post.publishedUrl ? "View the published social post" : "No published URL stored"}
             >
               View Published <ExternalLink size={14} />
-            </button>
+            </a>
           </div>
 
           <div className="details-divider"></div>
