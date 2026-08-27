@@ -1,4 +1,4 @@
-// src/components/CarouselLibraryView.jsx
+// src/components/CarouselLibraryView.jsx 
 import React from 'react';
 import { PostCardThumbnail, PlatformIcon } from './CalendarView';
 import { Sliders } from 'lucide-react';
@@ -8,7 +8,7 @@ export default function CarouselLibraryView({ posts, onPostClick }) {
 
   return (
     <div className="desk-planner-container" style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: 20 }}>
-      
+
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 14, borderBottom: '1px solid var(--paper-border)' }}>
         <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', fontWeight: 800, color: 'var(--ingsol-dark-navy)' }}>
           Carousel Deck Archives
@@ -24,8 +24,8 @@ export default function CarouselLibraryView({ posts, onPostClick }) {
             {carouselPosts.map(post => {
               const slideCount = post.carouselSlides?.length || 0;
               return (
-                <div 
-                  key={post.id} 
+                <div
+                  key={post.id}
                   className="post-card pinned-paper-card"
                   onClick={() => onPostClick(post)}
                   style={{ padding: '8px' }}
@@ -42,7 +42,7 @@ export default function CarouselLibraryView({ posts, onPostClick }) {
                     </div>
                     <PostCardThumbnail mediaId={post.mediaId} linkPreviewImage={post.linkPreviewImage} title={post.title} contentType={post.contentType} />
                   </div>
-                  
+
                   <div className="card-info" style={{ marginTop: 8 }}>
                     <div className="card-title" title={post.title}>{post.title}</div>
                     <div className="card-meta">

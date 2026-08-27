@@ -17,8 +17,10 @@ import {
   Search, 
   FileDown,
   FileUp,
-  Sliders
+  Sliders,
+  Sparkles
 } from 'lucide-react';
+import AssistantChat from './components/assistant/AssistantChat';
 import './App.css';
 
 export default function App() {
@@ -39,6 +41,7 @@ export default function App() {
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [modalDatePreset, setModalDatePreset] = useState('');
   const [editingPost, setEditingPost] = useState(null);
+  const [isAssistantOpen, setIsAssistantOpen] = useState(false);
 
   // Settings states
   const [workspaceName, setWorkspaceName] = useState('INGSOL Industrial Marketing');
@@ -651,6 +654,22 @@ export default function App() {
           }}
           onSave={handleSavePost}
         />
+      )}
+
+      {/* Assistant UI */}
+      <AssistantChat 
+        activeView={activeView} 
+        isOpen={isAssistantOpen} 
+        onClose={() => setIsAssistantOpen(false)} 
+      />
+      {!isAssistantOpen && (
+        <button 
+          className="ingsol-ai-button" 
+          onClick={() => setIsAssistantOpen(true)}
+          aria-label="Open INGSOL AI"
+        >
+          <Sparkles size={24} />
+        </button>
       )}
     </div>
   );

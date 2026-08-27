@@ -1,3 +1,4 @@
+
 // src/components/PostDetailsDrawer.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { getMediaBlob } from '../services/db';
@@ -141,11 +142,11 @@ function PremiumCarouselViewer({ slides = [], onEscapeClose }) {
 
 /* ─── Status dot colour map ─────────────────────────────────────────────── */
 const STATUS_COLORS = {
-  draft:     { dot: '#eab308', bg: '#fef9c3', text: '#854d0e' },
-  ready:     { dot: '#0C86D4', bg: '#e0f2fe', text: '#024791' },
+  draft: { dot: '#eab308', bg: '#fef9c3', text: '#854d0e' },
+  ready: { dot: '#0C86D4', bg: '#e0f2fe', text: '#024791' },
   scheduled: { dot: '#024791', bg: '#dbeafe', text: '#024791' },
   published: { dot: '#16a34a', bg: '#dcfce7', text: '#15803d' },
-  archived:  { dot: '#64748b', bg: '#f1f5f9', text: '#475569' },
+  archived: { dot: '#64748b', bg: '#f1f5f9', text: '#475569' },
 };
 
 /* ─── Main Drawer ───────────────────────────────────────────────────────── */
@@ -224,19 +225,19 @@ export default function PostDetailsDrawer({
   /* date formatting */
   const formattedDate = post.date
     ? new Date(post.date + 'T00:00:00').toLocaleDateString(undefined, {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    })
     : '—';
 
   const shortDate = post.date
     ? new Date(post.date + 'T00:00:00').toLocaleDateString(undefined, {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      })
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    })
     : '—';
 
   /* rendered creative */

@@ -10,7 +10,7 @@ export default function MediaLibraryView({ posts, onPostClick }) {
   const mediaPosts = posts.filter(post => {
     if (post.contentType === 'Text') return false;
     if (!post.mediaId && !post.linkPreviewImage) return false;
-    
+
     if (filterType === 'images') {
       return post.contentType === 'Single Image' || post.contentType === 'Story';
     }
@@ -29,7 +29,7 @@ export default function MediaLibraryView({ posts, onPostClick }) {
 
   return (
     <div className="desk-planner-container" style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: 20 }}>
-      
+
       {/* Sub Bar with Media Filters */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 14, borderBottom: '1px solid var(--paper-border)' }}>
         <div className="planner-view-switch">
@@ -44,7 +44,7 @@ export default function MediaLibraryView({ posts, onPostClick }) {
             <Sliders size={12} style={{ marginRight: 4, display: 'inline' }} /> Carousel Slides
           </button>
         </div>
-        
+
         <span style={{ fontSize: '0.78rem', color: 'var(--paper-text-muted)', fontWeight: 700 }}>
           {mediaPosts.length} creative {mediaPosts.length === 1 ? 'asset' : 'assets'} archived
         </span>
@@ -54,8 +54,8 @@ export default function MediaLibraryView({ posts, onPostClick }) {
         {mediaPosts.length > 0 ? (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
             {mediaPosts.map(post => (
-              <div 
-                key={post.id} 
+              <div
+                key={post.id}
                 className="post-card pinned-paper-card"
                 onClick={() => onPostClick(post)}
                 style={{ padding: '8px' }}
@@ -88,8 +88,8 @@ export default function MediaLibraryView({ posts, onPostClick }) {
             <FolderOpen className="empty-state-icon" />
             <div className="empty-state-title">No assets found</div>
             <div className="empty-state-text">
-              {filterType === 'all' 
-                ? 'Try uploading or scheduling your first post containing an image or link.' 
+              {filterType === 'all'
+                ? 'Try uploading or scheduling your first post containing an image or link.'
                 : `There are no media assets matching the filter "${filterType}".`}
             </div>
           </div>
