@@ -40,10 +40,12 @@ export default function Sidebar({ activeView, setActiveView, counts }) {
       <div className="sidebar-header">
         <div className="sidebar-logo">
           <div className="sidebar-logo-icon">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="logo-svg">
-              <rect x="2" y="2" width="20" height="20" rx="5" fill="#024791" />
-              <path d="M7 17V7L17 17V7" stroke="#34C1EE" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+            <img 
+              src="/assets/INGSOL - Logo 1.png" 
+              alt="INGSOL Logo" 
+              className="logo-svg"
+              style={{ objectFit: 'contain' }}
+            />
           </div>
           <div className="sidebar-brand-text">
             <span className="brand-ingsol">INGSOL</span>
@@ -94,13 +96,6 @@ export default function Sidebar({ activeView, setActiveView, counts }) {
         ))}
       </div>
 
-      {/* Bottom leather branding / stamp */}
-      <div className="sidebar-footer">
-        <div className="leather-stamp">
-          <div className="stamp-ring"></div>
-          <span>INDUSTRIAL PLANNER</span>
-        </div>
-      </div>
     </aside>
   );
 }
