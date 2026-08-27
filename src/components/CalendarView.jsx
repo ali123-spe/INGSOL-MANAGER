@@ -234,7 +234,7 @@ export default function CalendarView({
             <div key={d} className="weekday-label">{d}</div>
           ))}
         </div>
-        <div className="calendar-grid-body" style={{ gridTemplateRows: `repeat(${totalCells / 7}, 1fr)` }}>
+        <div className="calendar-grid-body" style={{ gridTemplateRows: `repeat(${totalCells / 7}, minmax(140px, auto))` }}>
           {cells.map(({ date, isCurrentMonth }, idx) => {
             const dateStr = normalizeDate(date);
             const isToday = normalizeDate(new Date()) === dateStr;
@@ -289,7 +289,7 @@ export default function CalendarView({
                         {/* Image strip */}
                         <div className="card-thumbnail-container">
                           <PostCardThumbnail
-                            mediaId={post.mediaId}
+                            mediaId={post.contentType === 'Carousel' && post.carouselSlides?.length > 0 ? post.carouselSlides[0].mediaId : post.mediaId}
                             linkPreviewImage={post.linkPreviewImage}
                             title={post.title}
                             contentType={post.contentType}
@@ -411,7 +411,12 @@ export default function CalendarView({
                       </div>
 
                       <div className="card-thumbnail-container" style={{ aspectRatio: '16/10' }}>
-                        <PostCardThumbnail mediaId={post.mediaId} linkPreviewImage={post.linkPreviewImage} title={post.title} contentType={post.contentType} />
+                        <PostCardThumbnail 
+                          mediaId={post.contentType === 'Carousel' && post.carouselSlides?.length > 0 ? post.carouselSlides[0].mediaId : post.mediaId} 
+                          linkPreviewImage={post.linkPreviewImage} 
+                          title={post.title} 
+                          contentType={post.contentType} 
+                        />
                       </div>
                       <div className="card-info" style={{ marginTop: '6px', gap: '4px' }}>
                         <div className="card-title" style={{ fontSize: '0.82rem', webkitLineClamp: 3 }}>{post.title}</div>
@@ -492,7 +497,12 @@ export default function CalendarView({
                   </div>
 
                   <div className="card-thumbnail-container" style={{ aspectRatio: '16 / 9' }}>
-                    <PostCardThumbnail mediaId={post.mediaId} linkPreviewImage={post.linkPreviewImage} title={post.title} contentType={post.contentType} />
+                    <PostCardThumbnail 
+                      mediaId={post.contentType === 'Carousel' && post.carouselSlides?.length > 0 ? post.carouselSlides[0].mediaId : post.mediaId} 
+                      linkPreviewImage={post.linkPreviewImage} 
+                      title={post.title} 
+                      contentType={post.contentType} 
+                    />
                   </div>
                   <div className="card-info" style={{ marginTop: '10px', gap: '8px' }}>
                     <div className="card-title" style={{ fontSize: '0.95rem', fontWeight: 800, webkitLineClamp: 3 }}>
@@ -622,7 +632,7 @@ export default function CalendarView({
         </div>
       </div>
 
-      <div className="planner-content-area" style={{ flex: 1, minHeight: 0, position: 'relative' }}>
+      <div className="planner-content-area" style={{ flex: 1, minHeight: 0, position: 'relative', overflowY: 'auto', overflowX: 'hidden' }}>
         {calendarViewMode === 'month' && renderMonthView()}
         {calendarViewMode === 'week' && renderWeekView()}
         {calendarViewMode === 'day' && renderDayView()}

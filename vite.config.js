@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 
 // Helper function to decode HTML entities
@@ -174,6 +174,104 @@ export default defineConfig({
               image: ''
             }));
           }
+        });
+        
+        server.middlewares.use('/api/assistant', async (req, res) => {
+          if (req.method !== 'POST') {
+            res.statusCode = 405;
+            res.end('Method Not Allowed');
+            return;
+          }
+
+          const env = loadEnv('', process.cwd(), '');
+          const apiKey = env.GEMINI_API_KEY;
+
+          if (!apiKey) {
+            res.statusCode = 500;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ error: 'GEMINI_API_KEY is missing on the server.' }));
+            return;
+          }
+
+          let body = '';
+          req.on('data', chunk => {
+            body += chunk.toString();
+          });
+
+          req.on('end', async () => {
+            try {
+              const { messages, currentPage } = JSON.parse(body);
+
+              if (!messages || !Array.isArray(messages)) {
+                res.statusCode = 400;
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify({ error: 'messages array is required' }));
+                return;
+              }
+
+              const systemInstruction = `You are Ingsoll AI, the built-in conversational helper for Ingsoll Manager. 
+Your goal is to help users understand and navigate the application.
+Always speak naturally and conversationally, in simple language.
+Give step-by-step instructions when appropriate, but keep them concise.
+If you are unsure of what the user wants, ask clarifying questions.
+You MUST NEVER invent features that do not exist.
+You MUST NEVER claim to have performed an action.
+You are READ-ONLY. You cannot create, edit, delete, publish, or schedule posts. You cannot interact with the application on the user's behalf.
+Do not pretend to have tools or capabilities you lack. If you don't know something, say so.
+
+Currently, the user is looking at the following page/view: "${currentPage || 'unknown'}".
+
+Ingsoll Manager features:
+- Sidebar Navigation: Located on the left, allows switching between Calendar, All Posts, Drafts, Scheduled, Published, Archive, Media Library, Carousel Library, Settings.
+- Calendar: The main view. Supports Month, Week, and Day views. Displays pinned posts on dates.
+- Posts: Users can click on empty calendar days or the "Add Post" button to pin a new post. Posts have a Title, Date, Platform (LinkedIn, Instagram, Facebook, X, Other), Format (Single Image, Carousel, Video, Reel, Story, Text-Only), Status, Caption, Internal Notes, and Tags.
+- Drafts, Scheduled, Published: Posts are categorized by these statuses.
+- Post Details: Clicking an existing post opens a drawer with its details. From there, users can edit, duplicate, or delete it, and change its status.
+- Media Library: A central place to view all uploaded media files.
+- Carousel Library: A place specifically for carousel posts.
+- Filters: The top bar has dropdowns to filter posts by Platform, Status, and Format.
+
+Use this knowledge to assist the user.`;
+
+              const requestBody = {
+                system_instruction: {
+                  parts: [{ text: systemInstruction }]
+                },
+                contents: messages.map(msg => ({
+                  role: msg.role === 'user' ? 'user' : 'model',
+                  parts: [{ text: msg.content }]
+                })),
+                generationConfig: {
+                  temperature: 0.7,
+                  maxOutputTokens: 1000
+                }
+              };
+
+              const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestBody)
+              });
+
+              if (!response.ok) {
+                const errText = await response.text();
+                throw new Error(`Gemini API error: ${response.status} - ${errText}`);
+              }
+
+              const data = await response.json();
+              const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I received an empty response.';
+
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify({ reply: responseText }));
+            } catch (err) {
+              console.error('Error in /api/assistant:', err.message);
+              res.statusCode = 500;
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify({ error: err.message }));
+            }
+          });
         });
       }
     }
