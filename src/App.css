@@ -2489,3 +2489,184 @@
   display: block;
   border-radius: 4px;
 }
+
+/* ==========================================================================
+   MOBILE RESPONSIVE PASS (V1 FINAL)
+   ========================================================================== */
+.mobile-menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--paper-text-main);
+  cursor: pointer;
+  padding: 8px;
+  margin-right: 12px;
+}
+.sidebar-mobile-close {
+  display: none;
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+}
+.sidebar-mobile-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+@media (max-width: 768px) {
+  .app-container {
+    flex-direction: column;
+  }
+  
+  .mobile-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .sidebar.leather-panel {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1001;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 4px 0 20px rgba(0,0,0,0.5);
+  }
+  
+  .sidebar.leather-panel.sidebar-open {
+    transform: translateX(0);
+  }
+  
+  .sidebar-mobile-close {
+    display: flex;
+  }
+  
+  .sidebar-mobile-backdrop {
+    display: block;
+  }
+  
+  .main-panel {
+    width: 100vw;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .top-bar {
+    padding: 12px;
+    flex-direction: column;
+    align-items: stretch;
+    height: auto;
+    gap: 12px;
+  }
+  
+  .top-bar-left {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .search-container {
+    display: none; /* Hide global search on mobile to save space, or flex-basis 100% */
+  }
+  
+  .top-bar-right {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    width: 100%;
+  }
+  
+  .status-plates-row {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    width: 100%;
+    padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .status-plate {
+    flex: 0 0 auto;
+  }
+
+  .planner-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12px;
+    gap: 12px;
+  }
+  
+  .filters-left {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  /* Calendar Layout - Local Scroll */
+  .calendar-scroll-container, .calendar-container {
+    overflow-x: auto;
+    width: 100%;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .calendar-grid {
+    min-width: 800px; /* Force minimum width to maintain layout */
+  }
+  
+  /* Modals */
+  .post-modal-content {
+    width: 95vw !important;
+    max-height: 90vh !important;
+    margin: 5vh auto !important;
+    padding: 16px !important;
+  }
+  
+  .modal-layout, .post-editor-layout {
+    flex-direction: column;
+  }
+  
+  .modal-left, .modal-right {
+    width: 100% !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--paper-line);
+    padding-bottom: 16px;
+  }
+  
+  /* Drawer */
+  .post-details-drawer {
+    width: 100vw !important;
+    right: 0 !important;
+  }
+  
+  /* Libraries Grid */
+  .desk-planner-container > div[style*="grid"] {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
+  }
+  
+  /* AI Panel */
+  .assistant-panel {
+    width: 100vw !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+  }
+  
+  /* Delete Post Modal */
+  .danger-modal-content {
+    width: 95vw !important;
+  }
+  
+  .btn {
+    padding: 12px 16px; /* Larger tap targets */
+  }
+}
+

@@ -18,7 +18,8 @@ import {
   FileDown,
   FileUp,
   Sliders,
-  Sparkles
+  Sparkles,
+  Menu
 } from 'lucide-react';
 import AssistantChat from './components/assistant/AssistantChat';
 import './App.css';
@@ -42,6 +43,7 @@ export default function App() {
   const [modalDatePreset, setModalDatePreset] = useState('');
   const [editingPost, setEditingPost] = useState(null);
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Settings states
   const [workspaceName, setWorkspaceName] = useState('INGSOL Industrial Marketing');
@@ -451,8 +453,11 @@ export default function App() {
         setActiveView={(view) => {
           setActiveView(view);
           resetFilters();
+          setIsSidebarOpen(false);
         }} 
         counts={getCounts()} 
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
       />
 
       {/* Main Panel */}
@@ -461,6 +466,13 @@ export default function App() {
         {/* Top Header bar with Physical Industrial Header */}
         <header className="top-bar industrial-header">
           <div className="top-bar-left">
+            <button 
+              className="mobile-menu-btn" 
+              onClick={() => setIsSidebarOpen(true)}
+              aria-label="Open Menu"
+            >
+              <Menu size={20} />
+            </button>
             <div className="view-title-plate">
               <h1 className="view-title">
                 {activeView === 'calendar' ? 'Content Calendar' : 

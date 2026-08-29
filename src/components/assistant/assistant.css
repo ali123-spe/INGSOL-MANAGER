@@ -187,3 +187,31 @@
 .ai-spin-icon {
   animation: ai-spin 1s linear infinite;
 }
+
+/* ==========================================================================
+   MOBILE RESPONSIVE PASS FOR AI PANEL
+   ========================================================================== */
+@media (max-width: 768px) {
+  .ingsol-ai-panel {
+    /* Position below the top-bar (approx 160px) to not cover header */
+    top: 160px;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    width: 100vw;
+    height: auto;
+    max-height: calc(100vh - 160px);
+    border-radius: 12px 12px 0 0;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    z-index: 50; /* Ensure it's above content but below a potential header z-index */
+  }
+
+  /* Make sure the main app header stays above if needed, 
+     though placing the drawer starting at top: 160px avoids overlap. */
+  .top-bar {
+    position: relative;
+    z-index: 60;
+  }
+}

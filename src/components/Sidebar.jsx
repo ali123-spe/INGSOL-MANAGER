@@ -10,10 +10,11 @@ import {
   Image,
   Sliders,
   Settings,
-  Globe
+  Globe,
+  X
 } from 'lucide-react';
 
-export default function Sidebar({ activeView, setActiveView, counts }) {
+export default function Sidebar({ activeView, setActiveView, counts, isOpen, onClose }) {
   const menuItems = [
     { id: 'calendar', label: 'Calendar', icon: Calendar, section: 'Workspace' },
     { id: 'all-posts', label: 'All Posts', icon: Layers, section: 'Workspace' },
@@ -33,8 +34,19 @@ export default function Sidebar({ activeView, setActiveView, counts }) {
   const sections = ['Workspace', 'Library', 'Settings'];
 
   return (
-    <aside className="sidebar leather-panel">
-      {/* Outer stitched line */}
+    <>
+      {/* Mobile Backdrop */}
+      {isOpen && (
+        <div className="sidebar-mobile-backdrop" onClick={onClose} />
+      )}
+      
+      <aside className={`sidebar leather-panel ${isOpen ? 'sidebar-open' : ''}`}>
+        {/* Mobile close button */}
+        <button className="sidebar-mobile-close" onClick={onClose} aria-label="Close menu">
+          <X size={20} />
+        </button>
+
+        {/* Outer stitched line */}
       <div className="leather-stitch-line"></div>
 
       <div className="sidebar-header">
@@ -97,5 +109,6 @@ export default function Sidebar({ activeView, setActiveView, counts }) {
       </div>
 
     </aside>
+    </>
   );
 }
