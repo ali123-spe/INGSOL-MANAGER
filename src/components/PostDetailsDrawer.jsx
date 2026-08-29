@@ -593,22 +593,25 @@ export default function PostDetailsDrawer({
           DELETE CONFIRM MODAL
       ════════════════════════════════════════════ */}
       {showDeleteConfirm && (
-        <div className="modal-overlay" style={{ zIndex: 1100 }}>
-          <div className="modal-container physical-sheet-modal" style={{ maxWidth: 420 }}>
-            <div className="modal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <h2 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#dc2626', margin: 0 }}>
-                <AlertTriangle size={18} /> Delete this post?
+        <div className="modal-overlay" style={{ zIndex: 1100, padding: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="modal-container physical-sheet-modal" style={{ maxWidth: 540, width: '100%', borderRadius: 12, overflow: 'hidden', display: 'flex', flexDirection: 'column', backgroundColor: '#ffffff', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}>
+            <div className="modal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '32px 32px 16px' }}>
+              <h2 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: 12, color: '#dc2626', margin: 0, fontSize: '1.65rem', fontWeight: 700, letterSpacing: '-0.02em' }}>
+                <AlertTriangle size={28} strokeWidth={2.2} /> Delete this post?
               </h2>
-              <button className="modal-close tactile-close-btn" onClick={() => setShowDeleteConfirm(false)}>
-                <X size={17} />
+              <button className="modal-close tactile-close-btn" onClick={() => setShowDeleteConfirm(false)} style={{ border: '1px solid #e5e7eb', borderRadius: 8, padding: 6, background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+                <X size={18} color="#6b7280" />
               </button>
             </div>
-            <div className="modal-body" style={{ fontSize: '0.88rem', color: 'var(--paper-text-muted)', lineHeight: 1.55, padding: '16px 24px' }}>
+            <div className="modal-body" style={{ fontSize: '1.05rem', color: '#4b5563', lineHeight: 1.6, padding: '0 32px 32px' }}>
               This will permanently remove <strong>"{post.title}"</strong> and all pinned creative assets from your workspace.
             </div>
-            <div className="modal-footer" style={{ borderTop: 'none', padding: '12px 24px 24px', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button className="btn btn-secondary tactile-btn" onClick={() => setShowDeleteConfirm(false)}>Cancel</button>
-              <button className="btn btn-danger tactile-btn" onClick={() => { onDelete(post.id); setShowDeleteConfirm(false); onClose(); }}>Delete Permanently</button>
+            <div style={{ height: 1, backgroundColor: '#f3f4f6', width: '100%' }} />
+            <div className="modal-footer" style={{ borderTop: 'none', padding: '24px 32px', display: 'flex', gap: 12, justifyContent: 'flex-end', backgroundColor: '#ffffff' }}>
+              <button className="btn btn-secondary tactile-btn" onClick={() => setShowDeleteConfirm(false)} style={{ padding: '10px 24px', fontSize: '1rem', fontWeight: 600, borderRadius: 8, border: '1px solid #d1d5db', backgroundColor: '#ffffff', color: '#111827', cursor: 'pointer' }}>Cancel</button>
+              <button className="btn btn-danger tactile-btn" onClick={() => { onDelete(post.id); setShowDeleteConfirm(false); onClose(); }} style={{ padding: '10px 24px', fontSize: '1rem', fontWeight: 600, borderRadius: 8, display: 'flex', alignItems: 'center', gap: 8, backgroundColor: '#dc2626', color: '#ffffff', border: 'none', cursor: 'pointer' }}>
+                <Trash2 size={18} /> Delete permanently
+              </button>
             </div>
           </div>
         </div>
