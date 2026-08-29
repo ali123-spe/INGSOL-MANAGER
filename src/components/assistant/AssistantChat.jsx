@@ -41,12 +41,19 @@ export default function AssistantChat({ activeView, isOpen, onClose }) {
         })
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to connect to INGSOL AI');
+      let data = null;
+      try {
+        data = await response.json();
+      } catch (e) {
+        // Ignore JSON parse errors for non-JSON responses
       }
 
-      const data = await response.json();
-      if (data.error) throw new Error(data.error);
+      if (!response.ok) {
+        const errorMsg = data?.error ? `HTTP ${response.status}: ${data.error}` : `HTTP ${response.status}: Failed to connect to INGSOL AI`;
+        throw new Error(errorMsg);
+      }
+
+      if (data && data.error) throw new Error(data.error);
 
       setMessages([...newMessages, { role: 'assistant', content: data.reply }]);
     } catch (err) {
