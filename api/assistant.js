@@ -78,7 +78,7 @@ Use this knowledge to assist the user.`;
     };
 
     // Note: Used gemini-3.6-flash from the original vite.config.js implementation.
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
