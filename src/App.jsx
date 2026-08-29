@@ -639,6 +639,22 @@ export default function App() {
         {/* Dynamic view injection inside desk workspace */}
         <div className="workspace-desk-viewport" style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
           {renderActiveView()}
+
+          {/* Assistant UI */}
+          <AssistantChat 
+            activeView={activeView} 
+            isOpen={isAssistantOpen} 
+            onClose={() => setIsAssistantOpen(false)} 
+          />
+          {!isAssistantOpen && (
+            <button 
+              className="ingsol-ai-button" 
+              onClick={() => setIsAssistantOpen(true)}
+              aria-label="Open INGSOL AI"
+            >
+              <Sparkles size={24} />
+            </button>
+          )}
         </div>
 
       </main>
@@ -666,22 +682,6 @@ export default function App() {
           }}
           onSave={handleSavePost}
         />
-      )}
-
-      {/* Assistant UI */}
-      <AssistantChat 
-        activeView={activeView} 
-        isOpen={isAssistantOpen} 
-        onClose={() => setIsAssistantOpen(false)} 
-      />
-      {!isAssistantOpen && (
-        <button 
-          className="ingsol-ai-button" 
-          onClick={() => setIsAssistantOpen(true)}
-          aria-label="Open INGSOL AI"
-        >
-          <Sparkles size={24} />
-        </button>
       )}
     </div>
   );

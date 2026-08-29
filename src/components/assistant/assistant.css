@@ -193,25 +193,27 @@
    ========================================================================== */
 @media (max-width: 768px) {
   .ingsol-ai-panel {
-    /* Position below the top-bar (approx 160px) to not cover header */
-    top: 160px;
+    /* Position absolute within workspace-desk-viewport so it starts exactly below header */
+    position: absolute;
+    top: 0;
     bottom: 0;
     right: 0;
     left: 0;
-    width: 100vw;
-    height: auto;
-    max-height: calc(100vh - 160px);
+    width: 100%;
+    height: 100%;
+    max-height: none;
     border-radius: 12px 12px 0 0;
     border-left: none;
     border-right: none;
     border-bottom: none;
-    z-index: 50; /* Ensure it's above content but below a potential header z-index */
+    border-top: 1px solid var(--paper-border);
+    z-index: 50; 
   }
 
-  /* Make sure the main app header stays above if needed, 
-     though placing the drawer starting at top: 160px avoids overlap. */
-  .top-bar {
-    position: relative;
-    z-index: 60;
+  .ingsol-ai-button {
+    /* Keep the button accessible on mobile */
+    bottom: 16px;
+    right: 16px;
+    z-index: 50;
   }
 }

@@ -514,7 +514,7 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
 
             {/* Caption (URL Detection active here) */}
             <div className="form-group full-width">
-              <label style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <label style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '4px' }}>
                 <span>Caption & Body Copy</span>
                 <span style={{ fontSize: '0.7rem', color: 'var(--ingsol-secondary)', fontWeight: 600 }}>
                   <Sparkles size={11} style={{ display: 'inline', marginRight: 3 }} />
@@ -623,7 +623,7 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
 
             {/* Design / Source URL */}
             <div className="form-group full-width">
-              <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                 <span>Source / Design File</span>
                 {designUrl && (
                   <span className="badge badge-platform-tactile" style={{ fontSize: '0.65rem' }}>
@@ -634,14 +634,14 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
                   Optional
                 </span>
               </label>
-              <div style={{ display: 'flex', gap: 6 }}>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                 <input
                   type="url"
                   value={designUrl}
                   onChange={(e) => setDesignUrl(e.target.value)}
                   className={`input-field-tactile ${errors.designUrl ? 'error' : ''}`}
                   placeholder="https://www.figma.com/design/... or canva.com/design/..."
-                  style={{ flex: 1 }}
+                  style={{ flex: 1, minWidth: 0 }}
                 />
                 {designUrl && !errors.designUrl && (
                   <a
@@ -692,7 +692,7 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
             Cancel
           </button>
           
-          <div style={{ display: 'flex', gap: 10 }}>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
             <button 
               className="btn btn-secondary tactile-btn" 
               onClick={() => handleSave('Draft')}
