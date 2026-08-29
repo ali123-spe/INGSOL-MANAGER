@@ -61,7 +61,7 @@ Use this knowledge to assist the user.`;
       role: msg.role === 'user' ? 'user' : 'model',
       parts: [{ text: msg.content }]
     }));
-    
+
     if (geminiMessages.length > 0 && geminiMessages[0].role === 'model') {
       geminiMessages.shift();
     }
