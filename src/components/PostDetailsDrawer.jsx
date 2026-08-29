@@ -595,8 +595,8 @@ export default function PostDetailsDrawer({
       {showDeleteConfirm && (
         <div className="modal-overlay" style={{ zIndex: 1100 }}>
           <div className="modal-container physical-sheet-modal" style={{ maxWidth: 420 }}>
-            <div className="modal-header">
-              <h2 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#dc2626' }}>
+            <div className="modal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <h2 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#dc2626', margin: 0 }}>
                 <AlertTriangle size={18} /> Delete this post?
               </h2>
               <button className="modal-close tactile-close-btn" onClick={() => setShowDeleteConfirm(false)}>
