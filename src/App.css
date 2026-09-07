@@ -2826,3 +2826,212 @@
   }
 }
 
+/* ==========================================================================
+   MOBILE RESPONSIVENESS OVERRIDES (V1 BUG FIX #3)
+   ========================================================================== */
+@media (max-width: 768px) {
+  /* 1. HEADER */
+  .top-bar.industrial-header {
+    height: auto !important;
+    flex-direction: column !important;
+    padding: 16px !important;
+    align-items: stretch !important;
+    gap: 16px !important;
+  }
+  .top-bar-left {
+    justify-content: flex-start !important;
+    width: 100% !important;
+  }
+  .search-container.tactile-search {
+    display: none !important;
+  }
+  .top-bar-right {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 16px !important;
+  }
+  
+  /* 2. STATISTICS */
+  .status-plates-row {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+  .status-plate {
+    width: 100% !important;
+    height: auto !important;
+    padding: 10px 4px !important;
+  }
+  .plate-count {
+    font-size: 1.1rem !important;
+  }
+  .plate-label {
+    font-size: 0.55rem !important;
+    text-align: center !important;
+  }
+  
+  /* 3. ADD POST */
+  .top-bar-right > .btn-primary {
+    width: 100% !important;
+    padding: 14px !important;
+    font-size: 1rem !important;
+  }
+  
+  /* 4. FILTERS */
+  .filters-bar.planner-toolbar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    height: auto !important;
+    padding: 16px !important;
+    gap: 12px !important;
+  }
+  .filters-left {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
+    width: 100% !important;
+  }
+  .filter-group-tactile {
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 6px !important;
+    width: 100% !important;
+  }
+  .filter-group-tactile .filter-label {
+    font-size: 0.7rem !important;
+  }
+  .filter-group-tactile select {
+    flex: 1 !important;
+    min-width: 0 !important;
+    height: 32px !important;
+    font-size: 0.8rem !important;
+  }
+  .filters-left .filter-group-tactile:nth-child(3) {
+    grid-column: 1 / -1 !important;
+  }
+  .btn-reset-filters {
+    grid-column: 1 / -1 !important;
+    padding: 8px !important;
+    font-size: 0.85rem !important;
+  }
+  
+  /* 5. ACTIVE COUNT */
+  .planner-metrics-indicator {
+    justify-content: center !important;
+    margin-top: 4px !important;
+    width: 100% !important;
+  }
+
+  /* 6. CALENDAR TOOLBAR */
+  .planner-controls-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 16px !important;
+    padding: 16px !important;
+  }
+  .date-nav-controls {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+  .planner-month-title {
+    font-size: 1.15rem !important;
+    margin-left: auto !important;
+    text-align: right !important;
+  }
+  .planner-view-switch {
+    width: 100% !important;
+    display: flex !important;
+  }
+  .planner-tab-btn {
+    flex: 1 !important;
+    padding: 8px !important;
+    font-size: 0.85rem !important;
+  }
+  .tactile-control-btn, .tactile-icon-btn {
+    padding: 8px 12px !important;
+  }
+
+  /* 7. MONTH CALENDAR */
+  .calendar-grid-header {
+    display: grid !important;
+  }
+  .weekday-label {
+    font-size: 0.65rem !important;
+    padding: 8px 0 !important;
+  }
+  .calendar-cell {
+    min-height: 85px !important;
+    padding: 4px !important;
+  }
+  .date-number {
+    width: 20px !important;
+    height: 20px !important;
+    font-size: 0.75rem !important;
+  }
+  .cell-add-btn {
+    display: none !important; /* hide the hover add button to save space */
+  }
+  
+  /* 8. POST DISPLAY (COMPACT) */
+  .calendar-cell .card-thumbnail-container {
+    display: none !important;
+  }
+  .calendar-cell .post-card.pinned-paper-card {
+    padding: 4px !important;
+    min-height: 0 !important;
+    gap: 2px !important;
+  }
+  .calendar-cell .card-top-meta {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 2px !important;
+  }
+  .calendar-cell .card-platform-name span {
+    display: none !important;
+  }
+  .calendar-cell .card-status-chip {
+    font-size: 0.45rem !important;
+    padding: 1px 3px !important;
+    letter-spacing: 0 !important;
+  }
+  .calendar-cell .card-title {
+    font-size: 0.6rem !important;
+    line-height: 1.1 !important;
+    -webkit-line-clamp: 2 !important;
+    margin-top: 2px !important;
+  }
+  .calendar-cell .card-slide-count {
+    display: none !important;
+  }
+  .calendar-cell .cell-plus-more {
+    font-size: 0.6rem !important;
+    padding: 2px !important;
+  }
+  
+  /* 9. FLOATING AI BUTTON */
+  .ingsol-ai-button {
+    bottom: 20px !important;
+    right: 20px !important;
+    width: 48px !important;
+    height: 48px !important;
+  }
+  .ingsol-ai-button svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+  
+  .binder-rings-row {
+    width: 95% !important;
+  }
+  .binder-spine {
+    height: 24px !important;
+  }
+  .binder-ring-unit {
+    height: 24px !important;
+  }
+}

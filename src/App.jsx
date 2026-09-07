@@ -19,7 +19,9 @@ import {
   FileUp,
   Sliders,
   Sparkles,
-  Menu
+  Menu,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import AssistantChat from './components/assistant/AssistantChat';
 import './App.css';
@@ -44,6 +46,7 @@ export default function App() {
   const [editingPost, setEditingPost] = useState(null);
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isMobileStatsExpanded, setIsMobileStatsExpanded] = useState(false);
 
   // Settings states
   const [workspaceName, setWorkspaceName] = useState('INGSOL Industrial Marketing');
@@ -498,8 +501,22 @@ export default function App() {
           </div>
 
           <div className="top-bar-right">
+            {/* Mobile Content Overview Collapsible Header */}
+            <div 
+              className="mobile-content-overview-header"
+              onClick={() => setIsMobileStatsExpanded(!isMobileStatsExpanded)}
+            >
+              <div className="overview-title">Content Overview</div>
+              <div className="overview-summary">
+                {!isMobileStatsExpanded && (
+                  <span>{getCounts().Draft} Drafts · {getCounts().Scheduled} Scheduled · {getCounts().Published} Published</span>
+                )}
+                {isMobileStatsExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              </div>
+            </div>
+
             {/* 4 Physical Status Plates */}
-            <div className="status-plates-row">
+            <div className={`status-plates-row ${isMobileStatsExpanded ? 'mobile-expanded' : ''}`}>
               <div 
                 className={`status-plate plate-draft ${filterStatus === 'Draft' ? 'active' : ''}`}
                 onClick={() => setFilterStatus(filterStatus === 'Draft' ? 'All' : 'Draft')}

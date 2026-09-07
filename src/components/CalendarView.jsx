@@ -128,6 +128,7 @@ export default function CalendarView({
 }) {
   const [calendarViewMode, setCalendarViewMode] = useState('month'); // month | week | day
   const [dragOverDate, setDragOverDate] = useState(null);
+  const [mobileSelectedDate, setMobileSelectedDate] = useState(normalizeDate(currentDate));
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -244,11 +245,12 @@ export default function CalendarView({
             return (
               <div
                 key={idx}
-                className={`calendar-cell ${isCurrentMonth ? '' : 'outside'} ${isToday ? 'today-cell' : ''} ${isDragOver ? 'drag-over' : ''}`}
+                className={`calendar-cell ${isCurrentMonth ? '' : 'outside'} ${isToday ? 'today-cell' : ''} ${isDragOver ? 'drag-over' : ''} ${mobileSelectedDate === dateStr ? 'mobile-selected' : ''}`}
                 onDragOver={handleDragOver}
                 onDragEnter={(e) => handleDragEnter(e, dateStr)}
                 onDragLeave={handleDragLeave}
                 onDrop={(e) => handleDrop(e, dateStr)}
+                onClick={() => setMobileSelectedDate(dateStr)}
               >
                 <div className="calendar-cell-header">
                   <div className={`date-number ${isToday ? 'today-marker' : ''}`}>
@@ -333,13 +335,77 @@ export default function CalendarView({
                   {dayPosts.length === 0 && (
                     <div 
                       className="cell-empty-hitbox" 
-                      onClick={() => onAddPostClick(dateStr)}
+                      onClick={(e) => {
+                         // Stop propagation on desktop, but allow on mobile
+                         if(window.innerWidth > 768) {
+                           onAddPostClick(dateStr);
+                         }
+                      }}
                     />
+                  )}
+                </div>
+                
+                {/* Mobile Specific Compact Previews */}
+                <div className="mobile-cell-previews">
+                  {dayPosts.slice(0, 3).map((post, pIdx) => (
+                    <div key={post.id} className="mobile-cell-preview-item" onClick={() => onPostClick(post)}>
+                       <div className="mobile-preview-thumb">
+                          <PostCardThumbnail
+                            mediaId={post.contentType === 'Carousel' && post.carouselSlides?.length > 0 ? post.carouselSlides[0].mediaId : post.mediaId}
+                            linkPreviewImage={post.linkPreviewImage}
+                            title={post.title}
+                            contentType={post.contentType}
+                          />
+                       </div>
+                       <div className="mobile-preview-icons">
+                         <PlatformIcon platform={post.platform} size={10} />
+                         <span className={`mobile-status-dot status-${post.status.toLowerCase()}`} />
+                       </div>
+                    </div>
+                  ))}
+                  {dayPosts.length > 3 && (
+                    <div className="mobile-preview-more">+{dayPosts.length - 3}</div>
                   )}
                 </div>
               </div>
             );
           })}
+        </div>
+
+        {/* Selected Day Posts - MOBILE ONLY */}
+        <div className="mobile-selected-day-posts">
+          <div className="selected-day-header">
+            <h3>Posts on {new Date(mobileSelectedDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</h3>
+            <span className="selected-day-count">{posts.filter(p => normalizeDate(p.date) === mobileSelectedDate).length}</span>
+          </div>
+          <div className="selected-day-cards">
+            {posts.filter(p => normalizeDate(p.date) === mobileSelectedDate).length === 0 ? (
+              <div className="selected-day-empty">No posts for this date.</div>
+            ) : (
+              posts.filter(p => normalizeDate(p.date) === mobileSelectedDate).map(post => (
+                <div key={post.id} className="mobile-post-card" onClick={() => onPostClick(post)}>
+                  <div className="mobile-post-thumb">
+                    <PostCardThumbnail
+                      mediaId={post.contentType === 'Carousel' && post.carouselSlides?.length > 0 ? post.carouselSlides[0].mediaId : post.mediaId}
+                      linkPreviewImage={post.linkPreviewImage}
+                      title={post.title}
+                      contentType={post.contentType}
+                    />
+                  </div>
+                  <div className="mobile-post-info">
+                    <h4 className="mobile-post-title">{post.title || 'Untitled Post'}</h4>
+                    <div className="mobile-post-meta">
+                      <PlatformIcon platform={post.platform} size={12} />
+                      <span className="mobile-platform-name">{post.platform}</span>
+                      <span className="meta-dot">·</span>
+                      <span className={`mobile-status status-${post.status.toLowerCase()}`}>{post.status.toUpperCase()}</span>
+                    </div>
+                    <div className="mobile-post-time">{post.time || '10:00 AM'}</div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </div>
     );
