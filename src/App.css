@@ -2744,3 +2744,85 @@
   }
 }
 
+@media (max-width: 600px) {
+  .physical-sheet-modal,
+  .physical-sheet-modal * {
+    box-sizing: border-box !important;
+  }
+  
+  .modal-overlay {
+    padding: 12px !important;
+  }
+
+  .physical-sheet-modal {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+  
+  .form-group,
+  .input-field-tactile,
+  .upload-dropzone,
+  .detected-content,
+  .form-group.full-width {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    grid-column: span 1 !important;
+  }
+  
+  .platform-pills-row {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+  
+  .caption-url-hint {
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    display: block !important;
+    margin-top: 4px !important;
+  }
+
+  .upload-dropzone-text,
+  .upload-dropzone-sub {
+    white-space: normal !important;
+    word-break: break-word !important;
+    max-width: 100% !important;
+  }
+  
+  .details-preview-media,
+  .detected-img {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  .paper-sheet-footer {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    padding: 12px 10px !important;
+  }
+
+  .paper-sheet-footer > div {
+    display: contents !important;
+  }
+
+  .paper-sheet-footer .btn {
+    padding: 10px 4px !important;
+    font-size: 0.75rem !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    white-space: normal !important;
+    line-height: 1.2 !important;
+    text-align: center !important;
+    justify-content: center !important;
+  }
+}
+

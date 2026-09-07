@@ -29,7 +29,7 @@ export default function App() {
   
   // Navigation & Filtering
   const [activeView, setActiveView] = useState('calendar');
-  const [currentDate, setCurrentDate] = useState(new Date(2026, 7, 8)); // August 8, 2026
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [searchQuery, setSearchQuery] = useState('');
   
   // Toolbar dropdown filters

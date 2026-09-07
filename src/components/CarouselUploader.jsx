@@ -211,16 +211,16 @@ export default function CarouselUploader({ slides, onChange }) {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <div className="slides-manager-header">
-        <label>Upload Carousel Slides</label>
+    <div>
+      <div className="slides-manager-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+        <label style={{ margin: 0 }}>Upload Carousel Slides</label>
         <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
           {slides.length} {slides.length === 1 ? 'slide' : 'slides'} uploaded
         </span>
       </div>
 
       {slides.length > 0 ? (
-        <div>
+        <div className="uploaded-preview-container paper-inset-frame" style={{ maxHeight: '300px', overflowY: 'auto', padding: '16px' }}>
           <div className="slides-grid">
             {slides.map((slide, index) => (
               <SlideCard
@@ -240,18 +240,17 @@ export default function CarouselUploader({ slides, onChange }) {
               <span>+ Add slide</span>
             </div>
           </div>
-          <p style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <p style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4, marginTop: '12px' }}>
             <ArrowLeftRight size={10} />
             Drag cards to reorder slides. First slide is used as cover.
           </p>
         </div>
       ) : (
         <div 
-          className="upload-dropzone" 
+          className="upload-dropzone paper-dropzone-tactile" 
           onClick={triggerFileSelect}
           onDragOver={(e) => e.preventDefault()}
           onDrop={handleDropzoneDrop}
-          style={{ padding: '36px 20px' }}
         >
           <Upload className="upload-dropzone-icon" />
           <div className="upload-dropzone-text">Click or drag images to upload slides</div>

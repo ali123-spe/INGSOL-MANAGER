@@ -516,7 +516,7 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
             <div className="form-group full-width">
               <label style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '4px' }}>
                 <span>Caption & Body Copy</span>
-                <span style={{ fontSize: '0.7rem', color: 'var(--ingsol-secondary)', fontWeight: 600 }}>
+                <span className="caption-url-hint" style={{ fontSize: '0.7rem', color: 'var(--ingsol-secondary)', fontWeight: 600 }}>
                   <Sparkles size={11} style={{ display: 'inline', marginRight: 3 }} />
                   Paste any URL to auto-extract preview image
                 </span>
