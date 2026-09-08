@@ -2948,8 +2948,10 @@
   .filter-group-tactile select {
     flex: 1 !important;
     min-width: 0 !important;
+    width: 100% !important;
     height: 32px !important;
     font-size: 0.8rem !important;
+    box-sizing: border-box !important;
   }
   .filters-left .filter-group-tactile:nth-child(3) {
     grid-column: 1 / -1 !important;
@@ -2959,6 +2961,58 @@
     padding: 8px !important;
     font-size: 0.85rem !important;
   }
+
+  /* Stack filters on ultra‑narrow screens (<360px) */
+  @media (max-width: 360px) {
+    .filters-left { grid-template-columns: 1fr !important; }
+    .filter-group-tactile { flex-direction: column !important; align-items: stretch !important; }
+    .filter-group-tactile .filter-label { margin-bottom: 2px; }
+  }
+
+  /* WEEK VIEW – make scrollable on mobile */
+  .week-grid-body {
+    display: flex !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    gap: 12px !important;
+    padding: 4px 16px 16px 16px !important;
+    width: 100vw !important;
+    margin-left: -16px !important;
+    scroll-snap-type: x mandatory;
+  }
+  .week-cell {
+    min-width: 260px !important;
+    flex: 0 0 auto !important;
+    border: 1px solid var(--paper-line) !important;
+    border-radius: var(--radius-md) !important;
+    background: #fff !important;
+    padding: 12px !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05) !important;
+    scroll-snap-align: center;
+  }
+
+  /* Bug 1: Selected day highlight */
+  .week-cell.today-cell {
+    background-color: #f0f9ff !important;
+    border: 1px solid var(--ingsol-primary) !important;
+    box-shadow: 0 2px 8px rgba(2, 71, 145, 0.1) !important;
+  }
+  
+  /* Remove the blue circular background behind text on mobile week view */
+  .week-cell .date-number-inline.today-marker {
+    background: transparent !important;
+    color: var(--ingsol-primary) !important;
+    box-shadow: none !important;
+    font-weight: 900 !important;
+  }
+
+  /* AI button safe‑area */
+  .ingsol-ai-button {
+    bottom: calc(20px + env(safe-area-inset-bottom)) !important;
+    right: calc(20px + env(safe-area-inset-right)) !important;
+    z-index: 99 !important;
+  }
+
   
   /* 5. ACTIVE COUNT */
   .planner-metrics-indicator {
@@ -3267,5 +3321,18 @@
   /* HIDE BINDER SPINE ON MOBILE */
   .binder-spine {
     display: none !important;
+  }
+  
+  /* 12. DAY VIEW RESPONSIVE HEADER */
+  .day-cell-title {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+    height: auto !important;
+  }
+  .day-cell-title .btn {
+    width: 100% !important;
+    justify-content: center !important;
   }
 }
