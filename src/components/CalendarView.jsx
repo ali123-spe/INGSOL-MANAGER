@@ -347,8 +347,11 @@ export default function CalendarView({
                 
                 {/* Mobile Specific Compact Previews */}
                 <div className="mobile-cell-previews">
-                  {dayPosts.slice(0, 3).map((post, pIdx) => (
-                    <div key={post.id} className="mobile-cell-preview-item" onClick={() => onPostClick(post)}>
+                  {dayPosts.slice(0, 1).map((post, pIdx) => (
+                    <div key={post.id} className="mobile-cell-preview-item" onClick={(e) => {
+                      e.stopPropagation();
+                      onPostClick(post);
+                    }}>
                        <div className="mobile-preview-thumb">
                           <PostCardThumbnail
                             mediaId={post.contentType === 'Carousel' && post.carouselSlides?.length > 0 ? post.carouselSlides[0].mediaId : post.mediaId}
@@ -363,8 +366,8 @@ export default function CalendarView({
                        </div>
                     </div>
                   ))}
-                  {dayPosts.length > 3 && (
-                    <div className="mobile-preview-more">+{dayPosts.length - 3}</div>
+                  {dayPosts.length > 1 && (
+                    <div className="mobile-preview-more">+{dayPosts.length - 1}</div>
                   )}
                 </div>
               </div>

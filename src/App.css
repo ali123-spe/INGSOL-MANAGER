@@ -2829,7 +2829,23 @@
 /* ==========================================================================
    MOBILE RESPONSIVENESS OVERRIDES (V1 BUG FIX #3)
    ========================================================================== */
+/* Desktop hides for mobile components */
+.mobile-cell-previews, .mobile-selected-day-posts, .mobile-content-overview-header {
+  display: none;
+}
+
 @media (max-width: 768px) {
+  /* SHOW MOBILE COMPONENTS */
+  .mobile-cell-previews {
+    display: flex !important;
+  }
+  .mobile-selected-day-posts {
+    display: flex !important;
+  }
+  .mobile-content-overview-header {
+    display: flex !important;
+  }
+
   /* 1. HEADER */
   .top-bar.industrial-header {
     height: auto !important;
@@ -2848,11 +2864,45 @@
   .top-bar-right {
     flex-direction: column !important;
     align-items: stretch !important;
-    gap: 16px !important;
+    gap: 12px !important;
   }
   
-  /* 2. STATISTICS */
+  /* 2. ADD POST BUTTON */
+  .top-bar-right > .btn-primary {
+    width: 100% !important;
+    padding: 14px !important;
+    font-size: 1rem !important;
+    order: -1 !important; /* Move Add Post to the top of top-bar-right */
+  }
+
+  /* 3. COLLAPSIBLE CONTENT OVERVIEW (STATISTICS) */
+  .mobile-content-overview-header {
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 10px 14px !important;
+    background: #ffffff !important;
+    border: 1px solid #d5cbba !important;
+    border-radius: var(--radius-sm) !important;
+    cursor: pointer !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
+  }
+  .mobile-content-overview-header .overview-title {
+    font-weight: 800 !important;
+    font-size: 0.85rem !important;
+    color: var(--ingsol-dark-navy) !important;
+  }
+  .mobile-content-overview-header .overview-summary {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    color: var(--paper-text-muted) !important;
+  }
   .status-plates-row {
+    display: none !important;
+  }
+  .status-plates-row.mobile-expanded {
     display: grid !important;
     grid-template-columns: repeat(4, 1fr) !important;
     gap: 8px !important;
@@ -2869,13 +2919,6 @@
   .plate-label {
     font-size: 0.55rem !important;
     text-align: center !important;
-  }
-  
-  /* 3. ADD POST */
-  .top-bar-right > .btn-primary {
-    width: 100% !important;
-    padding: 14px !important;
-    font-size: 1rem !important;
   }
   
   /* 4. FILTERS */
@@ -2924,12 +2967,25 @@
     width: 100% !important;
   }
 
-  /* 6. CALENDAR TOOLBAR */
+  /* 6. HERO CALENDAR CONTAINER */
+  .workspace-desk-viewport {
+    padding: 0 !important;
+    background: #fdfdfc !important;
+  }
+  .desk-planner-container {
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  
+  /* 7. CALENDAR TOOLBAR */
   .planner-controls-header {
     flex-direction: column !important;
     align-items: stretch !important;
     gap: 16px !important;
     padding: 16px !important;
+    background: transparent !important;
+    border-bottom: none !important;
   }
   .date-nav-controls {
     width: 100% !important;
@@ -2956,82 +3012,260 @@
     padding: 8px 12px !important;
   }
 
-  /* 7. MONTH CALENDAR */
+  /* 8. HERO CALENDAR GRID & CELLS */
   .calendar-grid-header {
     display: grid !important;
+    background: transparent !important;
+    border-bottom: none !important;
   }
   .weekday-label {
     font-size: 0.65rem !important;
     padding: 8px 0 !important;
+    border-right: none !important;
+  }
+  
+  /* Make the grid look like Option 6 (rounded container with shadow) */
+  .calendar-grid-body {
+    background: #ffffff !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
+    margin: 0 16px 16px 16px !important;
+    border: 1px solid var(--paper-border) !important;
+    overflow: hidden !important;
   }
   .calendar-cell {
-    min-height: 85px !important;
+    min-height: 80px !important;
     padding: 4px !important;
+    border-right: 1px solid var(--paper-line) !important;
+    border-bottom: 1px solid var(--paper-line) !important;
   }
+  .calendar-cell:nth-child(7n) {
+    border-right: none !important;
+  }
+  .calendar-cell.outside {
+    background-color: #fafafa !important;
+  }
+  
+  /* Selected day styling */
+  .calendar-cell.mobile-selected {
+    background-color: #e0f2fe !important;
+    box-shadow: inset 0 0 0 2px var(--ingsol-secondary) !important;
+    border-radius: 4px !important;
+    z-index: 10 !important;
+  }
+  
   .date-number {
     width: 20px !important;
     height: 20px !important;
     font-size: 0.75rem !important;
   }
   .cell-add-btn {
-    display: none !important; /* hide the hover add button to save space */
-  }
-  
-  /* 8. POST DISPLAY (COMPACT) */
-  .calendar-cell .card-thumbnail-container {
     display: none !important;
   }
-  .calendar-cell .post-card.pinned-paper-card {
-    padding: 4px !important;
-    min-height: 0 !important;
-    gap: 2px !important;
+  
+  /* Hide desktop pinned cards on mobile */
+  .calendar-cell .card-stack-container {
+    display: none !important;
   }
-  .calendar-cell .card-top-meta {
+
+  /* 9. IMAGE-FOCUSED MOBILE PREVIEWS IN CELLS */
+  .mobile-cell-previews {
     flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 2px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    height: 100% !important;
+    margin-top: 4px !important;
   }
-  .calendar-cell .card-platform-name span {
-    display: none !important;
+  .mobile-cell-preview-item {
+    position: relative !important;
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
   }
-  .calendar-cell .card-status-chip {
-    font-size: 0.45rem !important;
-    padding: 1px 3px !important;
-    letter-spacing: 0 !important;
+  .mobile-preview-thumb {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 6px !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(0,0,0,0.1) !important;
+    background: #f1f1f1 !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
   }
-  .calendar-cell .card-title {
+  .mobile-preview-thumb img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+  /* Optional: if there's no media, just show an empty box or icon */
+  .mobile-preview-thumb .card-no-media-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+  }
+  .mobile-preview-thumb .card-no-media-placeholder span {
+    display: none;
+  }
+  .mobile-preview-thumb .card-no-media-placeholder svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .mobile-preview-icons {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    margin-top: -6px !important; /* Pull up over the image */
+    background: #ffffff !important;
+    border-radius: 10px !important;
+    padding: 1px 4px !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15) !important;
+    z-index: 2 !important;
+  }
+  .mobile-status-dot {
+    width: 6px !important;
+    height: 6px !important;
+    border-radius: 50% !important;
+  }
+  .mobile-status-dot.status-draft { background-color: #eab308 !important; }
+  .mobile-status-dot.status-ready { background-color: #0C86D4 !important; }
+  .mobile-status-dot.status-scheduled { background-color: #024791 !important; }
+  .mobile-status-dot.status-published { background-color: #16a34a !important; }
+  .mobile-status-dot.status-archived { background-color: #64748b !important; }
+
+  .mobile-preview-more {
     font-size: 0.6rem !important;
-    line-height: 1.1 !important;
-    -webkit-line-clamp: 2 !important;
-    margin-top: 2px !important;
+    font-weight: 800 !important;
+    color: var(--paper-text-muted) !important;
   }
-  .calendar-cell .card-slide-count {
-    display: none !important;
+
+  /* 10. MODERN POST CARDS FOR SELECTED DAY */
+  .mobile-selected-day-posts {
+    flex-direction: column !important;
+    padding: 0 16px 24px 16px !important;
+    gap: 12px !important;
   }
-  .calendar-cell .cell-plus-more {
-    font-size: 0.6rem !important;
-    padding: 2px !important;
+  .selected-day-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    border-bottom: 2px solid #eaeaea !important;
+    padding-bottom: 8px !important;
+    margin-bottom: 8px !important;
   }
+  .selected-day-header h3 {
+    font-size: 0.95rem !important;
+    font-weight: 800 !important;
+    color: var(--ingsol-dark-navy) !important;
+  }
+  .selected-day-count {
+    font-size: 0.8rem !important;
+    font-weight: 700 !important;
+    color: var(--paper-text-muted) !important;
+  }
+  .selected-day-cards {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+  .mobile-post-card {
+    display: flex !important;
+    background: #ffffff !important;
+    border-radius: var(--radius-md) !important;
+    border: 1px solid var(--paper-border) !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04) !important;
+    padding: 12px !important;
+    gap: 12px !important;
+  }
+  .mobile-post-thumb {
+    width: 60px !important;
+    height: 60px !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    flex-shrink: 0 !important;
+    background: #f5f5f5 !important;
+  }
+  .mobile-post-thumb img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+  .mobile-post-thumb .card-no-media-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #999;
+    font-size: 0.6rem;
+    gap: 4px;
+  }
+
+  .mobile-post-info {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+  }
+  .mobile-post-title {
+    font-size: 0.9rem !important;
+    font-weight: 700 !important;
+    color: var(--paper-text-main) !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  .mobile-post-meta {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    font-size: 0.75rem !important;
+  }
+  .mobile-platform-name {
+    font-weight: 700 !important;
+    color: var(--paper-text-muted) !important;
+  }
+  .meta-dot {
+    color: #ccc !important;
+  }
+  .mobile-status {
+    font-size: 0.65rem !important;
+    font-weight: 800 !important;
+    padding: 2px 6px !important;
+    border-radius: 4px !important;
+  }
+  .mobile-status.status-draft { background: #fef9c3 !important; color: #ca8a04 !important; }
+  .mobile-status.status-ready { background: #e0f2fe !important; color: #0C86D4 !important; }
+  .mobile-status.status-scheduled { background: #dbeafe !important; color: #024791 !important; }
+  .mobile-status.status-published { background: #dcfce7 !important; color: #16a34a !important; }
+  .mobile-status.status-archived { background: #f1f5f9 !important; color: #64748b !important; }
   
-  /* 9. FLOATING AI BUTTON */
+  .mobile-post-time {
+    font-size: 0.75rem !important;
+    color: var(--paper-text-muted) !important;
+    margin-top: 4px !important;
+  }
+
+  /* 11. FLOATING AI BUTTON */
   .ingsol-ai-button {
     bottom: 20px !important;
     right: 20px !important;
     width: 48px !important;
     height: 48px !important;
+    z-index: 99 !important;
   }
   .ingsol-ai-button svg {
     width: 20px !important;
     height: 20px !important;
   }
   
-  .binder-rings-row {
-    width: 95% !important;
-  }
+  /* HIDE BINDER SPINE ON MOBILE */
   .binder-spine {
-    height: 24px !important;
-  }
-  .binder-ring-unit {
-    height: 24px !important;
+    display: none !important;
   }
 }
