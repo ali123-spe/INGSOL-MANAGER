@@ -120,6 +120,7 @@ export function PlatformIcon({ platform, size = 11 }) {
 
 export default function CalendarView({
   posts,
+  dateRanges = [],
   currentDate,
   setCurrentDate,
   onPostClick,
@@ -241,6 +242,12 @@ export default function CalendarView({
             const isToday = normalizeDate(new Date()) === dateStr;
             const dayPosts = posts.filter(p => normalizeDate(p.date) === dateStr);
             const isDragOver = dragOverDate === dateStr;
+            
+            const activeRanges = dateRanges.filter(r => {
+              const rStart = normalizeDate(r.start_date);
+              const rEnd = normalizeDate(r.end_date);
+              return dateStr >= rStart && dateStr <= rEnd;
+            });
 
             return (
               <div
@@ -267,6 +274,41 @@ export default function CalendarView({
                     <Plus size={11} />
                   </button>
                 </div>
+                
+                {activeRanges.length > 0 && (
+                  <div className="campaign-bars-container" style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginBottom: '4px' }}>
+                    {activeRanges.map(r => {
+                      const isStart = dateStr === normalizeDate(r.start_date);
+                      const isEnd = dateStr === normalizeDate(r.end_date);
+                      return (
+                        <div 
+                          key={r.id} 
+                          style={{
+                            backgroundColor: r.color || 'var(--ingsol-primary)',
+                            color: 'white',
+                            fontSize: '0.65rem',
+                            fontWeight: 600,
+                            padding: '2px 4px',
+                            marginLeft: isStart ? '4px' : '-4px', // connect to previous cell
+                            marginRight: isEnd ? '4px' : '-4px', // connect to next cell
+                            borderTopLeftRadius: isStart ? '4px' : '0',
+                            borderBottomLeftRadius: isStart ? '4px' : '0',
+                            borderTopRightRadius: isEnd ? '4px' : '0',
+                            borderBottomRightRadius: isEnd ? '4px' : '0',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            zIndex: 1, // sit above cell border
+                            position: 'relative'
+                          }}
+                          title={`${r.name} (${r.status || 'Planned'})`}
+                        >
+                          {isStart || date.getDay() === 0 ? r.name : '\u00A0'}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
 
                 {/* Pinned Card Stack */}
                 <div className="card-stack-container">
@@ -437,6 +479,12 @@ export default function CalendarView({
             const dayPosts = posts.filter(p => normalizeDate(p.date) === dateStr);
             const isToday = normalizeDate(new Date()) === dateStr;
             const isDragOver = dragOverDate === dateStr;
+            
+            const activeRanges = dateRanges.filter(r => {
+              const rStart = normalizeDate(r.start_date);
+              const rEnd = normalizeDate(r.end_date);
+              return dateStr >= rStart && dateStr <= rEnd;
+            });
 
             return (
               <div 
@@ -454,6 +502,41 @@ export default function CalendarView({
                   </span>
                 </div>
                 
+                {activeRanges.length > 0 && (
+                  <div className="campaign-bars-container" style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginBottom: '8px' }}>
+                    {activeRanges.map(r => {
+                      const isStart = dateStr === normalizeDate(r.start_date);
+                      const isEnd = dateStr === normalizeDate(r.end_date);
+                      return (
+                        <div 
+                          key={r.id} 
+                          style={{
+                            backgroundColor: r.color || 'var(--ingsol-primary)',
+                            color: 'white',
+                            fontSize: '0.7rem',
+                            fontWeight: 600,
+                            padding: '4px 6px',
+                            marginLeft: isStart ? '4px' : '-8px',
+                            marginRight: isEnd ? '4px' : '-8px',
+                            borderTopLeftRadius: isStart ? '4px' : '0',
+                            borderBottomLeftRadius: isStart ? '4px' : '0',
+                            borderTopRightRadius: isEnd ? '4px' : '0',
+                            borderBottomRightRadius: isEnd ? '4px' : '0',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            zIndex: 1,
+                            position: 'relative'
+                          }}
+                          title={`${r.name} (${r.status || 'Planned'})`}
+                        >
+                          {isStart || day.getDay() === 0 ? r.name : '\u00A0'}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
                 <button 
                   className="btn btn-secondary tactile-btn" 
                   style={{ width: '100%', padding: '6px', fontSize: '0.76rem', marginBottom: 8 }}
@@ -524,6 +607,12 @@ export default function CalendarView({
     const dateStr = normalizeDate(currentDate);
     const dayPosts = posts.filter(p => normalizeDate(p.date) === dateStr);
     const weekdaysNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    
+    const activeRanges = dateRanges.filter(r => {
+      const rStart = normalizeDate(r.start_date);
+      const rEnd = normalizeDate(r.end_date);
+      return dateStr >= rStart && dateStr <= rEnd;
+    });
 
     return (
       <div className="calendar-wrapper desk-planner-page">
@@ -543,6 +632,27 @@ export default function CalendarView({
                 <Plus size={15} /> Pin Post to this Day
               </button>
             </div>
+
+            {activeRanges.length > 0 && (
+              <div style={{ padding: '0 4px', marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <h4 style={{ fontSize: '0.85rem', color: 'var(--paper-text-muted)', textTransform: 'uppercase', letterSpacing: 1, fontWeight: 700, margin: 0 }}>Active Campaigns</h4>
+                {activeRanges.map(r => (
+                  <div key={r.id} style={{ 
+                    backgroundColor: 'white', 
+                    border: `1px solid ${r.color || 'var(--ingsol-primary)'}`, 
+                    borderLeft: `4px solid ${r.color || 'var(--ingsol-primary)'}`, 
+                    padding: '12px', 
+                    borderRadius: 'var(--radius-sm)',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <h5 style={{ margin: 0, fontSize: '1rem', color: 'var(--ingsol-dark-navy)' }}>{r.name}</h5>
+                      <span className={`status-pill status-${(r.status || 'Planned').toLowerCase().replace(' ', '-')}`}>{r.status || 'Planned'}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
 
             <div style={{ 
               display: 'grid', 

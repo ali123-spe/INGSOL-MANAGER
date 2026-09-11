@@ -6,12 +6,14 @@ import PostModal from './components/PostModal';
 import PostDetailsDrawer from './components/PostDetailsDrawer';
 import MediaLibraryView from './components/MediaLibraryView';
 import CarouselLibraryView from './components/CarouselLibraryView';
+import CampaignsView from './components/campaigns/CampaignsView';
 import { 
   getAllPosts, 
   savePost, 
   deletePost, 
   seedSampleData 
 } from './services/db';
+import { getUserRanges, setPostRange } from './services/campaigns';
 import { 
   Plus, 
   Search, 
@@ -32,6 +34,7 @@ export default function App() {
   const [session, setSession] = useState(null);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const [posts, setPosts] = useState([]);
+  const [dateRanges, setDateRanges] = useState([]);
   
   // Navigation & Filtering
   const [activeView, setActiveView] = useState('calendar');
@@ -51,6 +54,8 @@ export default function App() {
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isMobileStatsExpanded, setIsMobileStatsExpanded] = useState(false);
+  // Campaign pre-selection for PostModal
+  const [modalCampaignPreset, setModalCampaignPreset] = useState(null);
 
   // Settings states
   const [workspaceName, setWorkspaceName] = useState('INGSOL Industrial Marketing');
@@ -67,12 +72,14 @@ export default function App() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setIsLoadingAuth(false);
+      if (session) refreshDateRanges();
     });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      if (session) refreshDateRanges();
     });
 
     async function init() {
@@ -104,6 +111,15 @@ export default function App() {
       }
     } catch (err) {
       console.error("Failed to query posts:", err);
+    }
+  };
+
+  const refreshDateRanges = async () => {
+    try {
+      const ranges = await getUserRanges();
+      setDateRanges(ranges);
+    } catch (err) {
+      console.error("Failed to fetch date ranges:", err);
     }
   };
 
@@ -157,14 +173,22 @@ export default function App() {
   }, []);
 
   // Save/Update Post handler
-  const handleSavePost = async (postData, filesMap) => {
+  const handleSavePost = async (postData, filesMap, campaignId) => {
     try {
       await savePost(postData, filesMap);
+      // Persist campaign relationship in Supabase
+      try {
+        await setPostRange(postData.id, campaignId || null);
+      } catch (campErr) {
+        console.warn('Could not save campaign link (table may not exist yet):', campErr.message);
+      }
       await refreshPosts();
+      await refreshDateRanges();
       setIsPostModalOpen(false);
       setEditingPost(null);
+      setModalCampaignPreset(null);
     } catch (err) {
-      alert("Failed to save post: " + err.message);
+      alert("Failed to save content: " + err.message);
     }
   };
 
@@ -228,9 +252,10 @@ export default function App() {
   };
 
   // Open modals handlers
-  const handleAddPostClick = (dateStr) => {
+  const handleAddPostClick = (dateStr, campaignId = null) => {
     setEditingPost(null);
-    setModalDatePreset(dateStr);
+    setModalDatePreset(dateStr || '');
+    setModalCampaignPreset(campaignId);
     setIsPostModalOpen(true);
   };
 
@@ -299,6 +324,7 @@ export default function App() {
         return (
           <CalendarView
             posts={filteredPostsList}
+            dateRanges={dateRanges}
             currentDate={currentDate}
             setCurrentDate={setCurrentDate}
             onPostClick={setSelectedPost}
@@ -376,6 +402,9 @@ export default function App() {
       
       case 'carousels':
         return <CarouselLibraryView posts={posts} onPostClick={setSelectedPost} />;
+
+      case 'campaigns':
+        return <CampaignsView allPosts={posts} onCreateContent={(campaignId) => handleAddPostClick('', campaignId)} />;
 
       case 'platforms':
         return (
@@ -510,9 +539,11 @@ export default function App() {
               <h1 className="view-title">
                 {activeView === 'calendar' ? 'Content Calendar' : 
                  activeView === 'all-posts' ? 'All Posts' : 
+                 activeView === 'campaigns' ? 'Campaigns' :
                  activeView === 'media-library' ? 'Media Library' : 
                  activeView === 'carousels' ? 'Carousel Library' : 
                  activeView.charAt(0).toUpperCase() + activeView.slice(1)}
+
               </h1>
             </div>
 
@@ -723,9 +754,12 @@ export default function App() {
         <PostModal
           post={editingPost}
           datePreset={modalDatePreset}
+          dateRanges={dateRanges}
+          campaignPreset={modalCampaignPreset}
           onClose={() => {
             setIsPostModalOpen(false);
             setEditingPost(null);
+            setModalCampaignPreset(null);
           }}
           onSave={handleSavePost}
         />

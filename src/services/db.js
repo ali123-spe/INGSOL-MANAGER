@@ -124,12 +124,32 @@ export async function savePost(post, filesMap = {}) {
     const transaction = db.transaction('posts', 'readwrite');
     const store = transaction.objectStore('posts');
     
-    // Add timestamps
     const now = new Date().toISOString();
+    
+    // Auto-timestamping logic
+    let actualStartAt = post.actualStartAt;
+    let completedAt = post.completedAt;
+
+    // Meaningful work implies actual start (if not already started)
+    const isMeaningfulWork = post.status === 'In Progress' || post.status === 'Completed' || post.status === 'Published' || post.mediaId || (post.carouselSlides && post.carouselSlides.length > 0) || post.caption?.length > 10;
+    if (isMeaningfulWork && !actualStartAt) {
+      actualStartAt = now;
+    }
+
+    if ((post.status === 'Completed' || post.status === 'Published') && !completedAt) {
+      completedAt = now;
+    } else if (post.status !== 'Completed' && post.status !== 'Published' && post.status !== 'Archived') {
+       // If user reverted status, we could optionally clear completedAt. 
+       // Keeping it might be fine, but clearing it reflects the active state.
+       completedAt = null;
+    }
+
     const updatedPost = {
       ...post,
       updatedAt: now,
-      createdAt: post.createdAt || now
+      createdAt: post.createdAt || now,
+      actualStartAt,
+      completedAt
     };
 
     const request = store.put(updatedPost);

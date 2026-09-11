@@ -3336,3 +3336,640 @@
     justify-content: center !important;
   }
 }
+
+/* ==========================================================================
+   PROMPT 2 � CAMPAIGNS & DATE RANGES
+   ========================================================================== */
+
+/* -- CampaignsView container ------------------------------------------------ */
+.campaigns-view-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 24px;
+  gap: 24px;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.campaigns-view-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--paper-border);
+}
+
+.campaigns-view-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.2rem;
+  color: var(--ingsol-dark-navy);
+  margin: 0;
+}
+
+.campaigns-view-subtitle {
+  font-size: 0.82rem;
+  color: var(--paper-text-muted);
+  margin: 4px 0 0;
+}
+
+/* -- Campaign Cards Grid --------------------------------------------------- */
+.campaigns-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.campaign-card {
+  display: flex;
+  align-items: stretch;
+  background: var(--paper-card);
+  border: 1px solid var(--paper-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  cursor: pointer;
+  text-align: left;
+  transition: box-shadow 0.18s, transform 0.15s;
+  position: relative;
+  padding: 0;
+}
+
+.campaign-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  transform: translateY(-1px);
+}
+
+.campaign-card-accent {
+  width: 5px;
+  flex-shrink: 0;
+  background: var(--ingsol-primary);
+}
+
+.campaign-card-body {
+  flex: 1;
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.campaign-card-name {
+  font-weight: 800;
+  font-size: 0.92rem;
+  color: var(--ingsol-dark-navy);
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.campaign-card-dates {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  color: var(--paper-text-muted);
+  font-weight: 600;
+  flex-wrap: wrap;
+}
+
+.campaign-card-span-badge {
+  background: var(--desk-surface);
+  border: 1px solid var(--paper-border);
+  border-radius: 10px;
+  padding: 1px 7px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--ingsol-primary);
+  margin-left: 4px;
+}
+
+.campaign-card-description {
+  font-size: 0.78rem;
+  color: var(--paper-text-muted);
+  line-height: 1.4;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.campaign-card-chevron {
+  margin: auto 12px;
+  opacity: 0.35;
+  flex-shrink: 0;
+}
+
+
+/* -- Color Swatch Picker --------------------------------------------------- */
+.color-swatch-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.color-swatch-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: var(--swatch-color);
+  border: 3px solid transparent;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.12s;
+}
+
+.color-swatch-btn:hover {
+  transform: scale(1.1);
+}
+
+.color-swatch-btn.selected {
+  border-color: var(--paper-text-main);
+  box-shadow: 0 0 0 2px white, 0 0 0 4px var(--swatch-color);
+}
+
+
+/* -- Campaign Detail Panel ------------------------------------------------- */
+.campaign-detail-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(480px, 100vw);
+  background: var(--desk-surface);
+  border-left: 2px solid var(--paper-border);
+  box-shadow: -8px 0 32px rgba(0,0,0,0.15);
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideInRight 0.22s ease;
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);   opacity: 1; }
+}
+
+.campaign-panel-header {
+  padding: 20px 18px;
+  background: var(--paper-card);
+  border-bottom: 1px solid var(--paper-border);
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.campaign-panel-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--ingsol-dark-navy);
+  margin: 0 0 4px;
+  line-height: 1.3;
+}
+
+.campaign-panel-dates {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--paper-text-muted);
+}
+
+.campaign-panel-description {
+  margin: 6px 0 0;
+  font-size: 0.8rem;
+  color: var(--paper-text-muted);
+  line-height: 1.5;
+}
+
+/* -- Campaign Tabs --------------------------------------------------------- */
+.campaign-tabs-bar {
+  display: flex;
+  gap: 2px;
+  padding: 10px 12px 0;
+  background: var(--paper-card);
+  border-bottom: 1px solid var(--paper-border);
+}
+
+.campaign-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 14px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--paper-text-muted);
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.campaign-tab-btn:hover {
+  color: var(--ingsol-primary);
+}
+
+.campaign-tab-btn.active {
+  color: var(--ingsol-primary);
+  border-bottom-color: var(--ingsol-primary);
+}
+
+.campaign-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+}
+
+.campaign-tab-content {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+
+/* -- Upload Dropzone (campaign-specific) ----------------------------------- */
+.campaign-upload-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 20px;
+  border: 2px dashed var(--paper-border);
+  border-radius: var(--radius-sm);
+  background: var(--paper-bg);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  color: var(--paper-text-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.campaign-upload-dropzone:hover {
+  border-color: var(--ingsol-primary);
+  background: #f0f6ff;
+  color: var(--ingsol-primary);
+}
+
+
+/* -- Upload Progress ------------------------------------------------------- */
+.upload-queue {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.upload-queue-item {
+  background: var(--paper-card);
+  border: 1px solid var(--paper-border);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+}
+
+.upload-progress-bar-track {
+  height: 5px;
+  background: var(--paper-border);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.upload-progress-bar-fill {
+  height: 100%;
+  background: var(--ingsol-primary);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.upload-progress-bar-fill.done {
+  background: #059669;
+}
+
+
+/* -- Attachment Sections --------------------------------------------------- */
+.attachment-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.attachment-section-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--paper-text-muted);
+  padding: 4px 0;
+  border-bottom: 1px solid var(--paper-line);
+}
+
+
+/* -- Attachment Cards ------------------------------------------------------ */
+.attachment-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--paper-card);
+  border: 1px solid var(--paper-border);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  transition: box-shadow 0.15s;
+}
+
+.attachment-card:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.attachment-thumb {
+  width: 64px;
+  height: 64px;
+  border-radius: 4px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--desk-surface);
+  border: 1px solid var(--paper-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.attachment-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.attachment-thumb-placeholder {
+  font-size: 0.65rem;
+  color: var(--paper-text-muted);
+}
+
+.attachment-doc-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  position: relative;
+}
+
+.attachment-doc-icon-pdf  { background: #fef2f2; color: #dc2626; }
+.attachment-doc-icon-doc  { background: #eff6ff; color: #2563eb; }
+.attachment-doc-icon-generic { background: #f8f8f4; color: #64748b; }
+
+.doc-type-badge {
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: currentColor;
+  color: white;
+}
+.attachment-doc-icon-pdf  .doc-type-badge { background: #dc2626; }
+.attachment-doc-icon-doc  .doc-type-badge { background: #2563eb; }
+.attachment-doc-icon-generic .doc-type-badge { background: #64748b; }
+
+.attachment-link-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #f0fdf4;
+  color: #059669;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid #d1fae5;
+}
+
+.attachment-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.attachment-manager-name {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--ingsol-dark-navy);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.attachment-original-name {
+  font-size: 0.72rem;
+  color: var(--paper-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: monospace;
+  margin-top: 2px;
+}
+
+.attachment-meta {
+  font-size: 0.7rem;
+  color: var(--paper-text-muted);
+  margin-top: 2px;
+  font-weight: 600;
+}
+
+.attachment-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.attachment-action-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--paper-border);
+  background: var(--paper-bg);
+  color: var(--paper-text-muted);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  text-decoration: none;
+}
+
+.attachment-action-btn:hover {
+  background: var(--desk-surface);
+  color: var(--ingsol-primary);
+}
+
+.attachment-action-delete:hover {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+
+/* -- Add Link Form --------------------------------------------------------- */
+.link-add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: var(--desk-surface);
+  border: 1px solid var(--paper-border);
+  border-radius: var(--radius-sm);
+}
+
+
+/* -- Responsive Mobile ----------------------------------------------------- */
+@media (max-width: 768px) {
+  .campaigns-view-container { padding: 14px; gap: 14px; }
+  .campaigns-grid { grid-template-columns: 1fr; }
+  .campaigns-view-header { flex-direction: column; }
+
+  .campaign-detail-panel {
+    width: 100vw;
+    top: 0;
+    border-left: none;
+    border-top: 2px solid var(--paper-border);
+  }
+
+  .campaign-card-name { font-size: 0.88rem; }
+  .campaign-tab-btn { padding: 7px 10px; font-size: 0.72rem; }
+
+  .attachment-thumb { width: 52px; height: 52px; }
+  .attachment-doc-icon { width: 52px; height: 52px; }
+}
+
+
+/* ==========================================================================
+   PROMPT 2 - CAMPAIGNS and DATE RANGES
+   ========================================================================== */
+
+.campaigns-view-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 24px;
+  gap: 24px;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+.campaigns-view-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--paper-border);
+}
+.campaigns-view-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.2rem;
+  color: var(--ingsol-dark-navy);
+  margin: 0;
+}
+.campaigns-view-subtitle {
+  font-size: 0.82rem;
+  color: var(--paper-text-muted);
+  margin: 4px 0 0;
+}
+.campaigns-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+.campaign-card {
+  display: flex;
+  align-items: stretch;
+  background: var(--paper-card);
+  border: 1px solid var(--paper-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  cursor: pointer;
+  text-align: left;
+  transition: box-shadow 0.18s, transform 0.15s;
+  padding: 0;
+}
+.campaign-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); transform: translateY(-1px); }
+.campaign-card-accent { width: 5px; flex-shrink: 0; }
+.campaign-card-body { flex: 1; padding: 14px 12px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.campaign-card-name { font-weight: 800; font-size: 0.92rem; color: var(--ingsol-dark-navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.campaign-card-dates { display: flex; align-items: center; gap: 5px; font-size: 0.75rem; color: var(--paper-text-muted); font-weight: 600; flex-wrap: wrap; }
+.campaign-card-span-badge { background: var(--desk-surface); border: 1px solid var(--paper-border); border-radius: 10px; padding: 1px 7px; font-size: 0.68rem; font-weight: 700; color: var(--ingsol-primary); margin-left: 4px; }
+.campaign-card-description { font-size: 0.78rem; color: var(--paper-text-muted); line-height: 1.4; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.campaign-card-chevron { margin: auto 12px; opacity: 0.35; flex-shrink: 0; }
+.color-swatch-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+.color-swatch-btn { width: 30px; height: 30px; border-radius: 50%; background-color: var(--swatch-color); border: 3px solid transparent; cursor: pointer; transition: border-color 0.15s, transform 0.12s; }
+.color-swatch-btn:hover { transform: scale(1.1); }
+.color-swatch-btn.selected { border-color: var(--paper-text-main); box-shadow: 0 0 0 2px white, 0 0 0 4px var(--swatch-color); }
+.campaign-detail-panel { position: fixed; top: 0; right: 0; bottom: 0; width: min(480px, 100vw); background: var(--desk-surface); border-left: 2px solid var(--paper-border); box-shadow: -8px 0 32px rgba(0,0,0,0.15); z-index: 500; display: flex; flex-direction: column; overflow: hidden; animation: slideInRight 0.22s ease; }
+@keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+.campaign-panel-header { padding: 20px 18px; background: var(--paper-card); border-bottom: 1px solid var(--paper-border); display: flex; gap: 12px; align-items: flex-start; }
+.campaign-panel-title { font-family: var(--font-display); font-weight: 800; font-size: 1.1rem; color: var(--ingsol-dark-navy); margin: 0 0 4px; line-height: 1.3; }
+.campaign-panel-dates { display: flex; align-items: center; gap: 5px; font-size: 0.78rem; font-weight: 600; color: var(--paper-text-muted); }
+.campaign-panel-description { margin: 6px 0 0; font-size: 0.8rem; color: var(--paper-text-muted); line-height: 1.5; }
+.campaign-tabs-bar { display: flex; gap: 2px; padding: 10px 12px 0; background: var(--paper-card); border-bottom: 1px solid var(--paper-border); }
+.campaign-tab-btn { display: flex; align-items: center; gap: 5px; padding: 8px 14px; font-size: 0.78rem; font-weight: 700; color: var(--paper-text-muted); background: transparent; border: none; border-bottom: 3px solid transparent; cursor: pointer; transition: color 0.15s, border-color 0.15s; letter-spacing: 0.02em; text-transform: uppercase; }
+.campaign-tab-btn:hover { color: var(--ingsol-primary); }
+.campaign-tab-btn.active { color: var(--ingsol-primary); border-bottom-color: var(--ingsol-primary); }
+.campaign-panel-body { flex: 1; overflow-y: auto; }
+.campaign-tab-content { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.campaign-upload-dropzone { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 20px; border: 2px dashed var(--paper-border); border-radius: var(--radius-sm); background: var(--paper-bg); cursor: pointer; transition: border-color 0.15s, background 0.15s; color: var(--paper-text-muted); font-size: 0.82rem; font-weight: 600; text-align: center; }
+.campaign-upload-dropzone:hover { border-color: var(--ingsol-primary); background: #f0f6ff; color: var(--ingsol-primary); }
+.upload-queue { display: flex; flex-direction: column; gap: 8px; }
+.upload-queue-item { background: var(--paper-card); border: 1px solid var(--paper-border); border-radius: var(--radius-sm); padding: 10px; }
+.upload-progress-bar-track { height: 5px; background: var(--paper-border); border-radius: 4px; overflow: hidden; margin-top: 6px; }
+.upload-progress-bar-fill { height: 100%; background: var(--ingsol-primary); border-radius: 4px; transition: width 0.3s ease; }
+.upload-progress-bar-fill.done { background: #059669; }
+.attachment-section { display: flex; flex-direction: column; gap: 8px; }
+.attachment-section-label { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--paper-text-muted); padding: 4px 0; border-bottom: 1px solid var(--paper-line); }
+.attachment-card { display: flex; align-items: center; gap: 12px; background: var(--paper-card); border: 1px solid var(--paper-border); border-radius: var(--radius-sm); padding: 10px; transition: box-shadow 0.15s; }
+.attachment-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.attachment-thumb { width: 64px; height: 64px; border-radius: 4px; overflow: hidden; flex-shrink: 0; background: var(--desk-surface); border: 1px solid var(--paper-border); display: flex; align-items: center; justify-content: center; }
+.attachment-thumb-img { width: 100%; height: 100%; object-fit: cover; }
+.attachment-thumb-placeholder { font-size: 0.65rem; color: var(--paper-text-muted); }
+.attachment-doc-icon { width: 64px; height: 64px; border-radius: 6px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; }
+.attachment-doc-icon-pdf { background: #fef2f2; color: #dc2626; }
+.attachment-doc-icon-doc { background: #eff6ff; color: #2563eb; }
+.attachment-doc-icon-generic { background: #f8f8f4; color: #64748b; }
+.doc-type-badge { font-size: 0.6rem; font-weight: 800; letter-spacing: 0.05em; padding: 1px 5px; border-radius: 3px; color: white; }
+.attachment-doc-icon-pdf .doc-type-badge { background: #dc2626; }
+.attachment-doc-icon-doc .doc-type-badge { background: #2563eb; }
+.attachment-doc-icon-generic .doc-type-badge { background: #64748b; }
+.attachment-link-icon { width: 48px; height: 48px; border-radius: 50%; background: #f0fdf4; color: #059669; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid #d1fae5; }
+.attachment-info { flex: 1; min-width: 0; }
+.attachment-manager-name { font-weight: 700; font-size: 0.85rem; color: var(--ingsol-dark-navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.attachment-original-name { font-size: 0.72rem; color: var(--paper-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: monospace; margin-top: 2px; }
+.attachment-meta { font-size: 0.7rem; color: var(--paper-text-muted); margin-top: 2px; font-weight: 600; }
+.attachment-actions { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
+.attachment-action-btn { width: 30px; height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--paper-border); background: var(--paper-bg); color: var(--paper-text-muted); cursor: pointer; transition: background 0.12s, color 0.12s; text-decoration: none; }
+.attachment-action-btn:hover { background: var(--desk-surface); color: var(--ingsol-primary); }
+.attachment-action-delete:hover { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
+.link-add-form { display: flex; flex-direction: column; gap: 8px; padding: 12px; background: var(--desk-surface); border: 1px solid var(--paper-border); border-radius: var(--radius-sm); }
+@media (max-width: 768px) {
+  .campaigns-view-container { padding: 14px; gap: 14px; }
+  .campaigns-grid { grid-template-columns: 1fr; }
+  .campaigns-view-header { flex-direction: column; }
+  .campaign-detail-panel { width: 100vw; border-left: none; }
+  .campaign-tab-btn { padding: 7px 10px; font-size: 0.72rem; }
+  .attachment-thumb { width: 52px; height: 52px; }
+  .attachment-doc-icon { width: 52px; height: 52px; }
+}

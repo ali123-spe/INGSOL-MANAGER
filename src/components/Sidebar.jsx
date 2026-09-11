@@ -12,13 +12,15 @@ import {
   Settings,
   Globe,
   X,
-  LogOut
+  LogOut,
+  FolderOpen
 } from 'lucide-react';
 
 export default function Sidebar({ activeView, setActiveView, counts, isOpen, onClose, onLogout }) {
   const menuItems = [
-    { id: 'calendar', label: 'Calendar', icon: Calendar, section: 'Workspace' },
-    { id: 'all-posts', label: 'All Posts', icon: Layers, section: 'Workspace' },
+    { id: 'calendar',    label: 'Calendar',    icon: Calendar,    section: 'Workspace' },
+    { id: 'all-posts',   label: 'All Posts',   icon: Layers,      section: 'Workspace' },
+    { id: 'campaigns',   label: 'Campaigns',   icon: FolderOpen,  section: 'Workspace' },
 
     { id: 'drafts', label: 'Drafts', icon: FileText, section: 'Workspace', countKey: 'Draft' },
     { id: 'scheduled', label: 'Scheduled', icon: Clock, section: 'Workspace', countKey: 'Scheduled' },

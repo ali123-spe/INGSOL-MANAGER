@@ -36,7 +36,8 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
 
   // Form states
   const [title, setTitle] = useState('');
-  const [date, setDate] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [platform, setPlatform] = useState('LinkedIn');
   const [contentType, setContentType] = useState('Single Image');
   const [status, setStatus] = useState('Draft');
@@ -76,7 +77,8 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
   useEffect(() => {
     if (isEditMode) {
       setTitle(post.title || '');
-      setDate(post.date || '');
+      setStartDate(post.startDate || post.date || '');
+      setEndDate(post.endDate || '');
       setPlatform(post.platform || 'LinkedIn');
       setContentType(post.contentType || 'Single Image');
       setStatus(post.status || 'Draft');
@@ -106,7 +108,8 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
         });
       }
     } else {
-      setDate(datePreset || '');
+      setStartDate(datePreset || '');
+      setEndDate('');
       setTitle('');
       setPlatform('LinkedIn');
       setContentType('Single Image');
@@ -212,11 +215,7 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
     const newErrors = {};
 
     if (!title.trim()) {
-      newErrors.title = 'Post Title is required';
-    }
-
-    if (!date) {
-      newErrors.date = 'Publish Date is required';
+      newErrors.title = 'Title is required';
     }
 
     const formattedDesign = ensureAbsoluteUrl(designUrl);
@@ -386,7 +385,9 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
     const postData = {
       id: isEditMode ? post.id : `post_${Date.now()}`,
       title,
-      date,
+      date: startDate, // backward compat — primary date
+      startDate,
+      endDate,
       platform,
       contentType,
       status: finalStatus,
@@ -397,6 +398,8 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
       publishedUrl: finalPublishedUrl,
       tags: tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0),
       createdAt: isEditMode ? post.createdAt : new Date().toISOString(),
+      actualStartAt: isEditMode ? post.actualStartAt : null,
+      completedAt: isEditMode ? post.completedAt : null,
       linkPreviewImage: linkPreviewImage
     };
 
@@ -435,7 +438,7 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
       postData.carouselSlides = [];
     }
 
-    onSave(postData, filesMap);
+    onSave(postData, filesMap, selectedCampaignId || null);
   };
 
   const platformsList = [
@@ -443,6 +446,9 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
     { id: 'Instagram', label: 'Instagram', color: '#e1306c' },
     { id: 'Facebook', label: 'Facebook', color: '#1877f2' },
     { id: 'X', label: 'X (Twitter)', color: '#111827' },
+    { id: 'Website', label: 'Website', color: '#059669' },
+    { id: 'Email', label: 'Email', color: '#d97706' },
+    { id: 'Internal', label: 'Internal', color: '#4f46e5' },
     { id: 'Other', label: 'Other', color: '#545454' }
   ];
 
@@ -456,7 +462,7 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
         <div className="modal-header paper-sheet-header">
           <div className="modal-header-text">
             <span className="sheet-kicker">CONTENT MANIFEST</span>
-            <h2 className="modal-title">{isEditMode ? 'Edit Social Post' : 'Create Social Post'}</h2>
+            <h2 className="modal-title">{isEditMode ? 'Edit Content' : 'Create Content'}</h2>
           </div>
           <button className="modal-close tactile-close-btn" onClick={onClose}>
             <X size={18} />
@@ -468,7 +474,7 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
             
             {/* Title */}
             <div className="form-group full-width">
-              <label>Post Title *</label>
+              <label>Content Title *</label>
               <input
                 type="text"
                 value={title}
@@ -479,9 +485,33 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
               {errors.title && <div className="error-message">{errors.title}</div>}
             </div>
 
+            {/* Campaign / Date Range Assignment */}
+            <div className="form-group full-width">
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Layers size={13} style={{ opacity: 0.7 }} />
+                Campaign / Date Range
+                <span style={{ marginLeft: 'auto', fontSize: '0.72rem', color: 'var(--paper-text-muted)', fontWeight: 500 }}>Optional</span>
+              </label>
+              <select
+                value={selectedCampaignId}
+                onChange={(e) => setSelectedCampaignId(e.target.value)}
+                className="filter-select-tactile"
+              >
+                <option value="">— No Campaign / Standalone Content —</option>
+                {dateRanges.map(r => {
+                  const fmt = (d) => d ? new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '';
+                  return (
+                    <option key={r.id} value={r.id}>
+                      {r.name} — {fmt(r.start_date)} → {fmt(r.end_date)}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+
             {/* Platform Selector Pills */}
             <div className="form-group full-width">
-              <label>Target Social Network</label>
+              <label>Distribution / Channel <span style={{ color: 'var(--paper-text-muted)', fontWeight: 500 }}>(Optional)</span></label>
               <div className="platform-pills-row">
                 {platformsList.map(p => (
                   <button
@@ -499,7 +529,7 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
 
             {/* Date */}
             <div className="form-group">
-              <label>Publish Date *</label>
+              <label>Date / Schedule <span style={{ color: 'var(--paper-text-muted)', fontWeight: 500 }}>(Optional)</span></label>
               <div className="input-with-icon">
                 <Calendar size={15} className="input-prefix-icon" />
                 <input
@@ -528,14 +558,17 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
                 <option value="Video">Video</option>
                 <option value="Reel">Reel</option>
                 <option value="Story">Story</option>
+                <option value="Files">Files</option>
                 <option value="Text">Text-Only</option>
+                <option value="Link / Article">Link / Article</option>
+                <option value="Other">Other</option>
               </select>
             </div>
 
             {/* Caption (URL Detection active here) */}
             <div className="form-group full-width">
               <label style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '4px' }}>
-                <span>Caption & Body Copy</span>
+                <span>Description / Content</span>
                 <span className="caption-url-hint" style={{ fontSize: '0.7rem', color: 'var(--ingsol-secondary)', fontWeight: 600 }}>
                   <Sparkles size={11} style={{ display: 'inline', marginRight: 3 }} />
                   Paste any URL to auto-extract preview image
@@ -664,7 +697,7 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
             {/* Design / Source URL */}
             <div className="form-group full-width">
               <label style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                <span>Source / Design File</span>
+                <span>Source / Reference Link</span>
                 {designUrl && (
                   <span className="badge badge-platform-tactile" style={{ fontSize: '0.65rem' }}>
                     {designPlatform.label}
@@ -743,7 +776,7 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
               className="btn btn-primary tactile-action-btn" 
               onClick={() => handleSave(status === 'Draft' ? 'Scheduled' : status)}
             >
-              {isEditMode ? 'Update Post' : 'Schedule Post'}
+              {isEditMode ? 'Update Content' : 'Save to Manager'}
             </button>
           </div>
         </div>
