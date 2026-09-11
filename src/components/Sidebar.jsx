@@ -11,10 +11,11 @@ import {
   Sliders,
   Settings,
   Globe,
-  X
+  X,
+  LogOut
 } from 'lucide-react';
 
-export default function Sidebar({ activeView, setActiveView, counts, isOpen, onClose }) {
+export default function Sidebar({ activeView, setActiveView, counts, isOpen, onClose, onLogout }) {
   const menuItems = [
     { id: 'calendar', label: 'Calendar', icon: Calendar, section: 'Workspace' },
     { id: 'all-posts', label: 'All Posts', icon: Layers, section: 'Workspace' },
@@ -106,6 +107,21 @@ export default function Sidebar({ activeView, setActiveView, counts, isOpen, onC
               })}
           </div>
         ))}
+        
+        <div className="sidebar-section" style={{ marginTop: 'auto', paddingTop: '20px' }}>
+          <button
+            onClick={onLogout}
+            className="sidebar-item embossed-item"
+            style={{ color: 'var(--paper-text-muted)' }}
+          >
+            <div className="sidebar-item-left">
+              <div className="item-icon-wrapper">
+                <LogOut size={16} />
+              </div>
+              <span className="item-label">Log Out</span>
+            </div>
+          </button>
+        </div>
       </div>
 
     </aside>

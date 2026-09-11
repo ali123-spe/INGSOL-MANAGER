@@ -3,7 +3,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { getMediaBlob } from '../services/db';
 import { Upload, X, ArrowLeftRight, FileUp } from 'lucide-react';
 
-function SlideCard({ slide, index, onDragStart, onDragOver, onDrop, onDelete, onReplace }) {
+function SlideCard({ slide, index, onDragStart, onDragOver, onDrop, onDelete, onReplace, onUpdateManagerName }) {
   const [url, setUrl] = useState(slide.imageUrl || null);
   const fileInputRef = useRef(null);
 
@@ -56,6 +56,19 @@ function SlideCard({ slide, index, onDragStart, onDragOver, onDrop, onDelete, on
       ) : (
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', color: 'var(--text-muted)' }}>
           Loading...
+        </div>
+      )}
+
+      {slide.originalFileName && (
+        <div style={{ position: 'absolute', bottom: '24px', left: 0, right: 0, padding: '4px', background: 'rgba(255,255,255,0.9)' }} onClick={(e) => e.stopPropagation()}>
+          <input
+            type="text"
+            value={slide.managerName || ''}
+            onChange={(e) => onUpdateManagerName(index, e.target.value)}
+            style={{ width: '100%', fontSize: '0.6rem', padding: '2px', border: '1px solid #ccc' }}
+            placeholder="Manager Name"
+            title={slide.originalFileName}
+          />
         </div>
       )}
 
@@ -121,11 +134,15 @@ export default function CarouselUploader({ slides, onChange }) {
 
     const newSlides = validFiles.map((file, idx) => {
       const id = `slide_new_${Date.now()}_${idx}_${Math.random().toString(36).substr(2, 5)}`;
+      const originalFileName = file.name;
+      const defaultManagerName = originalFileName.includes('.') ? originalFileName.substring(0, originalFileName.lastIndexOf('.')) : originalFileName;
+
       return {
         id,
         file, // Keep the actual File object so we can save it to IndexedDB later
         imageUrl: URL.createObjectURL(file), // Local preview URL
-        originalFileName: file.name,
+        originalFileName,
+        managerName: defaultManagerName,
         order: slides.length + idx + 1
       };
     });
@@ -195,11 +212,15 @@ export default function CarouselUploader({ slides, onChange }) {
       URL.revokeObjectURL(updatedSlides[indexToReplace].imageUrl);
     }
 
+    const originalFileName = file.name;
+    const defaultManagerName = originalFileName.includes('.') ? originalFileName.substring(0, originalFileName.lastIndexOf('.')) : originalFileName;
+
     updatedSlides[indexToReplace] = {
       ...updatedSlides[indexToReplace],
       file,
       imageUrl: URL.createObjectURL(file),
-      originalFileName: file.name,
+      originalFileName,
+      managerName: defaultManagerName,
       // Clear any mediaId references as this is now a new local file upload
       mediaId: undefined
     };
@@ -208,6 +229,12 @@ export default function CarouselUploader({ slides, onChange }) {
 
   const triggerFileSelect = () => {
     fileInputRef.current.click();
+  };
+
+  const handleUpdateManagerName = (index, newName) => {
+    const updatedSlides = [...slides];
+    updatedSlides[index] = { ...updatedSlides[index], managerName: newName };
+    onChange(updatedSlides);
   };
 
   return (
@@ -232,6 +259,7 @@ export default function CarouselUploader({ slides, onChange }) {
                 onDrop={handleSlideDrop}
                 onDelete={handleDelete}
                 onReplace={handleReplace}
+                onUpdateManagerName={handleUpdateManagerName}
               />
             ))}
             

@@ -52,6 +52,10 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
   const [singleFileType, setSingleFileType] = useState(null);
   const [existingMediaId, setExistingMediaId] = useState(null);
   const [existingMimeType, setExistingMimeType] = useState(null);
+  
+  // Manager Name states
+  const [managerName, setManagerName] = useState('');
+  const [originalFileName, setOriginalFileName] = useState('');
 
   // Link Preview states & cache
   const [linkPreviewImage, setLinkPreviewImage] = useState('');
@@ -84,6 +88,8 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
       setExistingMediaId(post.mediaId || null);
       setExistingMimeType(post.mediaMimeType || null);
       setLinkPreviewImage(post.linkPreviewImage || '');
+      setManagerName(post.managerName || '');
+      setOriginalFileName(post.originalFileName || '');
 
       if (post.contentType === 'Carousel') {
         setCarouselSlides(post.carouselSlides || []);
@@ -118,6 +124,8 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
       setLinkPreviewImage('');
       setLinkPreviewMetadata(null);
       setCarouselSlides([]);
+      setManagerName('');
+      setOriginalFileName('');
     }
 
     return () => {
@@ -296,6 +304,8 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
     setSingleFileType(null);
     setExistingMediaId(null);
     setExistingMimeType(null);
+    setManagerName('');
+    setOriginalFileName('');
     setErrors(prev => ({ ...prev, media: null }));
   };
 
@@ -316,6 +326,9 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
       setSingleFilePreview(URL.createObjectURL(file));
       setExistingMediaId(null);
       setExistingMimeType(null);
+      const defaultManagerName = file.name.includes('.') ? file.name.substring(0, file.name.lastIndexOf('.')) : file.name;
+      setManagerName(defaultManagerName);
+      setOriginalFileName(file.name);
     }
     e.target.value = '';
   };
@@ -343,6 +356,9 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
       setSingleFilePreview(URL.createObjectURL(file));
       setExistingMediaId(null);
       setExistingMimeType(null);
+      const defaultManagerName = file.name.includes('.') ? file.name.substring(0, file.name.lastIndexOf('.')) : file.name;
+      setManagerName(defaultManagerName);
+      setOriginalFileName(file.name);
     }
   };
 
@@ -355,6 +371,8 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
     setSingleFileType(null);
     setExistingMediaId(null);
     setExistingMimeType(null);
+    setManagerName('');
+    setOriginalFileName('');
   };
 
   // Submit Handler
@@ -409,6 +427,8 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
 
       if (singleFile) {
         filesMap[mediaId] = singleFile;
+        postData.managerName = managerName;
+        postData.originalFileName = originalFileName;
       }
     } else {
       postData.mediaId = null;
@@ -615,6 +635,26 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
                       multiple={contentType !== 'Video' && contentType !== 'Reel'}
                       style={{ display: 'none' }}
                     />
+                    
+                    {singleFile && (
+                      <div style={{ marginTop: '12px', padding: '12px', backgroundColor: 'var(--paper-bg)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--paper-border)' }}>
+                        <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--paper-text-muted)', marginBottom: '8px' }}>📄 {managerName || originalFileName}</div>
+                        <div style={{ marginBottom: '10px' }}>
+                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, marginBottom: '4px' }}>Manager Name</label>
+                          <input
+                            type="text"
+                            value={managerName}
+                            onChange={(e) => setManagerName(e.target.value)}
+                            className="input-field-tactile"
+                            style={{ padding: '8px', fontSize: '0.85rem' }}
+                          />
+                        </div>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, marginBottom: '2px' }}>Original file</label>
+                          <div style={{ fontSize: '0.85rem', color: 'var(--ingsol-primary)', fontFamily: 'monospace' }}>{originalFileName}</div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
                 {errors.media && <div className="error-message">{errors.media}</div>}

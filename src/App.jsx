@@ -25,8 +25,12 @@ import {
 } from 'lucide-react';
 import AssistantChat from './components/assistant/AssistantChat';
 import './App.css';
+import Auth from './components/Auth';
+import { supabase } from './services/supabase';
 
 export default function App() {
+  const [session, setSession] = useState(null);
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const [posts, setPosts] = useState([]);
   
   // Navigation & Filtering
@@ -60,6 +64,17 @@ export default function App() {
 
   // Initialize DB and Seed Data on first launch
   useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setIsLoadingAuth(false);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
     async function init() {
       try {
         await seedSampleData();
@@ -69,7 +84,13 @@ export default function App() {
       }
     }
     init();
+
+    return () => subscription.unsubscribe();
   }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
 
   // Fetch all posts from IndexedDB
   const refreshPosts = async () => {
@@ -448,6 +469,14 @@ export default function App() {
     }
   };
 
+  if (isLoadingAuth) {
+    return <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--desk-surface)', color: 'var(--paper-text-main)' }}>Loading workspace...</div>;
+  }
+
+  if (!session) {
+    return <Auth onSession={setSession} />;
+  }
+
   return (
     <div className="app-container">
       {/* Sidebar navigation */}
@@ -461,6 +490,7 @@ export default function App() {
         counts={getCounts()} 
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
+        onLogout={handleLogout}
       />
 
       {/* Main Panel */}
