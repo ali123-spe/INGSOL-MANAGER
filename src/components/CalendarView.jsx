@@ -125,7 +125,8 @@ export default function CalendarView({
   setCurrentDate,
   onPostClick,
   onAddPostClick,
-  onUpdatePostDate
+  onUpdatePostDate,
+  onCampaignClick
 }) {
   const [calendarViewMode, setCalendarViewMode] = useState('month'); // month | week | day
   const [dragOverDate, setDragOverDate] = useState(null);
@@ -289,8 +290,8 @@ export default function CalendarView({
                             fontSize: '0.65rem',
                             fontWeight: 600,
                             padding: '2px 4px',
-                            marginLeft: isStart ? '4px' : '-4px', // connect to previous cell
-                            marginRight: isEnd ? '4px' : '-4px', // connect to next cell
+                            marginLeft: isStart ? '4px' : '-4px',
+                            marginRight: isEnd ? '4px' : '-4px',
                             borderTopLeftRadius: isStart ? '4px' : '0',
                             borderBottomLeftRadius: isStart ? '4px' : '0',
                             borderTopRightRadius: isEnd ? '4px' : '0',
@@ -298,10 +299,15 @@ export default function CalendarView({
                             whiteSpace: 'nowrap',
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
-                            zIndex: 1, // sit above cell border
-                            position: 'relative'
+                            zIndex: 1,
+                            position: 'relative',
+                            cursor: 'pointer'
                           }}
-                          title={`${r.name} (${r.status || 'Planned'})`}
+                          title={`${r.name} — click to open campaign`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (onCampaignClick) onCampaignClick(r);
+                          }}
                         >
                           {isStart || date.getDay() === 0 ? r.name : '\u00A0'}
                         </div>

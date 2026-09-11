@@ -485,29 +485,6 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
               {errors.title && <div className="error-message">{errors.title}</div>}
             </div>
 
-            {/* Campaign / Date Range Assignment */}
-            <div className="form-group full-width">
-              <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <Layers size={13} style={{ opacity: 0.7 }} />
-                Campaign / Date Range
-                <span style={{ marginLeft: 'auto', fontSize: '0.72rem', color: 'var(--paper-text-muted)', fontWeight: 500 }}>Optional</span>
-              </label>
-              <select
-                value={selectedCampaignId}
-                onChange={(e) => setSelectedCampaignId(e.target.value)}
-                className="filter-select-tactile"
-              >
-                <option value="">— No Campaign / Standalone Content —</option>
-                {dateRanges.map(r => {
-                  const fmt = (d) => d ? new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '';
-                  return (
-                    <option key={r.id} value={r.id}>
-                      {r.name} — {fmt(r.start_date)} → {fmt(r.end_date)}
-                    </option>
-                  );
-                })}
-              </select>
-            </div>
 
             {/* Platform Selector Pills */}
             <div className="form-group full-width">
@@ -527,19 +504,33 @@ export default function PostModal({ post, datePreset, onClose, onSave }) {
               </div>
             </div>
 
-            {/* Date */}
+            {/* Start Date */}
             <div className="form-group">
-              <label>Date / Schedule <span style={{ color: 'var(--paper-text-muted)', fontWeight: 500 }}>(Optional)</span></label>
+              <label>Start Date <span style={{ color: 'var(--paper-text-muted)', fontWeight: 500 }}>(Optional)</span></label>
               <div className="input-with-icon">
                 <Calendar size={15} className="input-prefix-icon" />
                 <input
                   type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
                   className="input-field-tactile"
                 />
               </div>
-              {errors.date && <div className="error-message">{errors.date}</div>}
+            </div>
+
+            {/* End Date */}
+            <div className="form-group">
+              <label>End Date <span style={{ color: 'var(--paper-text-muted)', fontWeight: 500 }}>(Optional)</span></label>
+              <div className="input-with-icon">
+                <Calendar size={15} className="input-prefix-icon" />
+                <input
+                  type="date"
+                  value={endDate}
+                  min={startDate || undefined}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="input-field-tactile"
+                />
+              </div>
             </div>
 
             {/* Format / Content Type */}

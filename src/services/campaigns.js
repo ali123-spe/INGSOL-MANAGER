@@ -15,21 +15,32 @@ export async function getUserRanges() {
   return data;
 }
 
-export async function createDateRange({ name, start_date, end_date, description, color }) {
+export async function createDateRange({ name, start_date, end_date, description, color, source_reference_url, internal_notes, tags }) {
   const { data: { user } } = await supabase.auth.getUser();
   const { data, error } = await supabase
     .from('date_ranges')
-    .insert([{ user_id: user.id, name, start_date, end_date, description, color }])
+    .insert([{
+      user_id: user.id,
+      name, start_date, end_date, description, color,
+      source_reference_url: source_reference_url || null,
+      internal_notes: internal_notes || null,
+      tags: tags || []
+    }])
     .select()
     .single();
   if (error) throw error;
   return data;
 }
 
-export async function updateDateRange(id, { name, start_date, end_date, description, color }) {
+export async function updateDateRange(id, { name, start_date, end_date, description, color, source_reference_url, internal_notes, tags }) {
   const { data, error } = await supabase
     .from('date_ranges')
-    .update({ name, start_date, end_date, description, color })
+    .update({
+      name, start_date, end_date, description, color,
+      source_reference_url: source_reference_url || null,
+      internal_notes: internal_notes || null,
+      tags: tags || []
+    })
     .eq('id', id)
     .select()
     .single();

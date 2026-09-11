@@ -1,19 +1,24 @@
 // src/App.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Sidebar from './components/Sidebar';
 import CalendarView, { PostCardThumbnail, PlatformIcon } from './components/CalendarView';
 import PostModal from './components/PostModal';
+import ContentModal from './components/ContentModal';
+import WorkTypeSelector from './components/WorkTypeSelector';
 import PostDetailsDrawer from './components/PostDetailsDrawer';
 import MediaLibraryView from './components/MediaLibraryView';
 import CarouselLibraryView from './components/CarouselLibraryView';
 import CampaignsView from './components/campaigns/CampaignsView';
+import CampaignModal from './components/campaigns/CampaignModal';
+import CampaignDetailPage from './components/campaigns/CampaignDetailPage';
 import { 
   getAllPosts, 
   savePost, 
   deletePost, 
   seedSampleData 
 } from './services/db';
-import { getUserRanges, setPostRange } from './services/campaigns';
+import { getUserRanges, createDateRange, updateDateRange, deleteDateRange } from './services/campaigns';
+import { getUserContent } from './services/content';
 import { 
   Plus, 
   Search, 
@@ -54,8 +59,15 @@ export default function App() {
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isMobileStatsExpanded, setIsMobileStatsExpanded] = useState(false);
-  // Campaign pre-selection for PostModal
-  const [modalCampaignPreset, setModalCampaignPreset] = useState(null);
+
+  // V1.5 Work Tracker state
+  const [showWorkTypeSelector, setShowWorkTypeSelector] = useState(false);
+  const [showContentModal, setShowContentModal] = useState(false);
+  const [showCampaignModal, setShowCampaignModal] = useState(false);
+  const [editingCampaign, setEditingCampaign] = useState(null);
+  const [selectedCampaign, setSelectedCampaign] = useState(null); // for detail page
+  const [allContent, setAllContent] = useState([]);
+  const [editingContent, setEditingContent] = useState(null);
 
   // Settings states
   const [workspaceName, setWorkspaceName] = useState('INGSOL Industrial Marketing');
@@ -72,14 +84,14 @@ export default function App() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setIsLoadingAuth(false);
-      if (session) refreshDateRanges();
+      if (session) { refreshDateRanges(); refreshContent(); }
     });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      if (session) refreshDateRanges();
+      if (session) { refreshDateRanges(); refreshContent(); }
     });
 
     async function init() {
@@ -172,25 +184,64 @@ export default function App() {
     };
   }, []);
 
-  // Save/Update Post handler
-  const handleSavePost = async (postData, filesMap, campaignId) => {
+  // Refresh content from Supabase
+  const refreshContent = useCallback(async () => {
+    try {
+      const data = await getUserContent();
+      setAllContent(data);
+    } catch (err) {
+      console.warn('Could not load content (table may not exist yet):', err.message);
+    }
+  }, []);
+
+  // Save/Update Post handler (legacy V1 posts in IndexedDB)
+  const handleSavePost = async (postData, filesMap) => {
     try {
       await savePost(postData, filesMap);
-      // Persist campaign relationship in Supabase
-      try {
-        await setPostRange(postData.id, campaignId || null);
-      } catch (campErr) {
-        console.warn('Could not save campaign link (table may not exist yet):', campErr.message);
-      }
       await refreshPosts();
-      await refreshDateRanges();
       setIsPostModalOpen(false);
       setEditingPost(null);
-      setModalCampaignPreset(null);
     } catch (err) {
-      alert("Failed to save content: " + err.message);
+      alert('Failed to save content: ' + err.message);
     }
   };
+
+  // V1.5 Content saved callback
+  const handleContentSaved = useCallback(async () => {
+    await refreshContent();
+  }, [refreshContent]);
+
+  // V1.5 Campaign saved callback
+  const handleCampaignSaved = useCallback(async (formData) => {
+    try {
+      let saved;
+      if (editingCampaign?.id) {
+        saved = await updateDateRange(editingCampaign.id, formData);
+        setDateRanges(prev => prev.map(r => r.id === saved.id ? saved : r));
+        if (selectedCampaign?.id === saved.id) setSelectedCampaign(saved);
+      } else {
+        saved = await createDateRange(formData);
+        setDateRanges(prev => [...prev, saved].sort((a,b) => a.start_date.localeCompare(b.start_date)));
+      }
+      return saved;
+    } catch (err) {
+      throw err;
+    } finally {
+      setShowCampaignModal(false);
+      setEditingCampaign(null);
+    }
+  }, [editingCampaign, selectedCampaign]);
+
+  const handleDeleteCampaign = useCallback(async (id) => {
+    try {
+      await deleteDateRange(id);
+      setDateRanges(prev => prev.filter(r => r.id !== id));
+      setSelectedCampaign(null);
+    } catch (err) {
+      alert('Failed to delete campaign: ' + err.message);
+    }
+  }, []);
+
 
   // Delete Post handler
   const handleDeletePost = async (id) => {
@@ -251,14 +302,13 @@ export default function App() {
     setIsPostModalOpen(true);
   };
 
-  // Open modals handlers
-  const handleAddPostClick = (dateStr, campaignId = null) => {
-    setEditingPost(null);
+  // Open modals handlers — "+ New Post" now opens WorkTypeSelector
+  const handleAddPostClick = (dateStr) => {
     setModalDatePreset(dateStr || '');
-    setModalCampaignPreset(campaignId);
-    setIsPostModalOpen(true);
+    setShowWorkTypeSelector(true);
   };
 
+  // Direct open for legacy edit (from PostDetailsDrawer)
   const handleEditPostClick = (postToEdit) => {
     setEditingPost(postToEdit);
     setIsPostModalOpen(true);
@@ -330,6 +380,7 @@ export default function App() {
             onPostClick={setSelectedPost}
             onAddPostClick={handleAddPostClick}
             onUpdatePostDate={handleUpdatePostDate}
+            onCampaignClick={(range) => setSelectedCampaign(range)}
           />
         );
       
@@ -404,7 +455,16 @@ export default function App() {
         return <CarouselLibraryView posts={posts} onPostClick={setSelectedPost} />;
 
       case 'campaigns':
-        return <CampaignsView allPosts={posts} onCreateContent={(campaignId) => handleAddPostClick('', campaignId)} />;
+        return (
+          <CampaignsView
+            allPosts={posts}
+            allContent={allContent}
+            onOpenCampaign={(range) => setSelectedCampaign(range)}
+            onCreateCampaign={() => { setEditingCampaign(null); setShowCampaignModal(true); }}
+            onEditCampaign={(range) => { setEditingCampaign(range); setShowCampaignModal(true); }}
+            onDeleteCampaign={handleDeleteCampaign}
+          />
+        );
 
       case 'platforms':
         return (
@@ -749,21 +809,82 @@ export default function App() {
         />
       )}
 
-      {/* Add / Edit modal popup */}
+      {/* V1 legacy Post edit modal (editing existing IndexedDB posts) */}
       {isPostModalOpen && (
         <PostModal
           post={editingPost}
           datePreset={modalDatePreset}
-          dateRanges={dateRanges}
-          campaignPreset={modalCampaignPreset}
           onClose={() => {
             setIsPostModalOpen(false);
             setEditingPost(null);
-            setModalCampaignPreset(null);
           }}
           onSave={handleSavePost}
+        />
+      )}
+
+      {/* V1.5 — Work Type Selector ("+ New Post" step 1) */}
+      {showWorkTypeSelector && (
+        <WorkTypeSelector
+          onSelectCampaign={() => {
+            setShowWorkTypeSelector(false);
+            setEditingCampaign(null);
+            setShowCampaignModal(true);
+          }}
+          onSelectContent={() => {
+            setShowWorkTypeSelector(false);
+            setEditingContent(null);
+            setShowContentModal(true);
+          }}
+          onClose={() => setShowWorkTypeSelector(false)}
+        />
+      )}
+
+      {/* V1.5 — Create / Edit Content */}
+      {showContentModal && (
+        <ContentModal
+          content={editingContent}
+          datePreset={modalDatePreset}
+          onClose={() => {
+            setShowContentModal(false);
+            setEditingContent(null);
+          }}
+          onSave={async () => {
+            await refreshContent();
+            setShowContentModal(false);
+            setEditingContent(null);
+          }}
+        />
+      )}
+
+      {/* V1.5 — Create / Edit Campaign */}
+      {showCampaignModal && (
+        <CampaignModal
+          range={editingCampaign}
+          onClose={() => {
+            setShowCampaignModal(false);
+            setEditingCampaign(null);
+          }}
+          onSave={handleCampaignSaved}
+        />
+      )}
+
+      {/* V1.5 — Campaign Detail Page (full tracker view) */}
+      {selectedCampaign && (
+        <CampaignDetailPage
+          range={selectedCampaign}
+          allContent={allContent}
+          onClose={() => setSelectedCampaign(null)}
+          onEdit={(r) => {
+            setSelectedCampaign(null);
+            setEditingCampaign(r);
+            setShowCampaignModal(true);
+          }}
+          onDelete={async (id) => {
+            await handleDeleteCampaign(id);
+          }}
         />
       )}
     </div>
   );
 }
+
