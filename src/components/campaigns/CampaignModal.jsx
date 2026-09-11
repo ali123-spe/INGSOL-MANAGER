@@ -134,7 +134,7 @@ export default function CampaignModal({ range, onClose, onSave }) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div
-        className="modal-container physical-sheet-modal"
+        className="modal-container physical-sheet-modal campaign-modal-wrapper"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="sheet-staple-accent" />
@@ -149,202 +149,208 @@ export default function CampaignModal({ range, onClose, onSave }) {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit}>
-          <div className="modal-body paper-sheet-body">
-            <div className="form-grid">
-
-              {/* Campaign Name */}
-              <div className="form-group full-width">
-                <label>Campaign Name *</label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className={`input-field-tactile ${errors.name ? 'error' : ''}`}
-                  placeholder="e.g. Industrial Automation Launch"
-                  autoFocus
-                />
-                {errors.name && <div className="error-message">{errors.name}</div>}
-              </div>
-
-              {/* Start Date */}
-              <div className="form-group">
-                <label>Start Date *</label>
-                <div className="input-with-icon">
-                  <Calendar size={15} className="input-prefix-icon" />
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+          <div className="modal-body paper-sheet-body" style={{ flex: 1, overflowY: 'auto', padding: '20px 24px' }}>
+            <div className="campaign-form-layout">
+              
+              {/* LEFT COLUMN */}
+              <div className="campaign-form-left" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {/* Campaign Name */}
+                <div className="form-group full-width">
+                  <label>Campaign Name *</label>
                   <input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className={`input-field-tactile ${errors.startDate ? 'error' : ''}`}
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className={`input-field-tactile ${errors.name ? 'error' : ''}`}
+                    placeholder="e.g. Industrial Automation Launch"
+                    autoFocus
                   />
+                  {errors.name && <div className="error-message">{errors.name}</div>}
                 </div>
-                {errors.startDate && <div className="error-message">{errors.startDate}</div>}
-              </div>
 
-              {/* End Date */}
-              <div className="form-group">
-                <label>End Date *</label>
-                <div className="input-with-icon">
-                  <Calendar size={15} className="input-prefix-icon" />
-                  <input
-                    type="date"
-                    value={endDate}
-                    min={startDate || undefined}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    className={`input-field-tactile ${errors.endDate ? 'error' : ''}`}
-                  />
-                </div>
-                {errors.endDate && <div className="error-message">{errors.endDate}</div>}
-              </div>
-
-              {/* Description */}
-              <div className="form-group full-width">
-                <label>Description <span style={{ color: 'var(--paper-text-muted)', fontWeight: 500 }}>— Optional</span></label>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="input-field-tactile"
-                  placeholder="Campaign goals, target audience, overview..."
-                  rows={3}
-                />
-              </div>
-
-              {/* Attachments */}
-              <div className="form-group full-width">
-                <label>Attachments <span style={{ color: 'var(--paper-text-muted)', fontWeight: 500 }}>— Optional</span></label>
-
-                {existingAttachments.length > 0 && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 10 }}>
-                    {existingAttachments.filter(a => a.attachment_type === 'file').map(att => (
-                      <div key={att.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px', background: 'var(--paper-bg)', border: '1px solid var(--paper-border)', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem' }}>
-                        <span>{getFileIcon(att.file?.file_type)}</span>
-                        <span style={{ flex: 1, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {att.file?.manager_name || att.file?.original_filename}
-                        </span>
-                        <button type="button" className="btn btn-danger tactile-btn" style={{ padding: '3px 8px', fontSize: '0.72rem' }} onClick={() => handleRemoveExisting(att)}>
-                          <Trash2 size={11} />
-                        </button>
-                      </div>
-                    ))}
+                {/* Dates */}
+                <div className="campaign-dates-row">
+                  <div className="form-group">
+                    <label>Start Date *</label>
+                    <div className="input-with-icon">
+                      <Calendar size={15} className="input-prefix-icon" />
+                      <input
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        className={`input-field-tactile ${errors.startDate ? 'error' : ''}`}
+                      />
+                    </div>
+                    {errors.startDate && <div className="error-message">{errors.startDate}</div>}
                   </div>
-                )}
+                  <div className="form-group">
+                    <label>End Date *</label>
+                    <div className="input-with-icon">
+                      <Calendar size={15} className="input-prefix-icon" />
+                      <input
+                        type="date"
+                        value={endDate}
+                        min={startDate || undefined}
+                        onChange={(e) => setEndDate(e.target.value)}
+                        className={`input-field-tactile ${errors.endDate ? 'error' : ''}`}
+                      />
+                    </div>
+                    {errors.endDate && <div className="error-message">{errors.endDate}</div>}
+                  </div>
+                </div>
 
-                {uploadQueue.length > 0 && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 10 }}>
-                    {uploadQueue.map((item, idx) => (
-                      <div key={idx} style={{ padding: '8px 10px', background: 'var(--paper-bg)', border: '1px solid var(--paper-border)', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                          <span style={{ flex: 1, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.file.name}</span>
-                          <button type="button" className="btn btn-danger tactile-btn" style={{ padding: '2px 7px', fontSize: '0.72rem' }} onClick={() => setUploadQueue(prev => prev.filter((_, i) => i !== idx))}>
+                {/* Description */}
+                <div className="form-group full-width">
+                  <label>Description <span style={{ color: 'var(--paper-text-muted)', fontWeight: 500 }}>— Optional</span></label>
+                  <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    className="input-field-tactile"
+                    placeholder="Campaign goals, target audience, overview..."
+                    rows={4}
+                  />
+                </div>
+
+                {/* Source / Reference Link */}
+                <div className="form-group full-width">
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                    <span>Source / Reference Link</span>
+                    {sourceUrl && <span className="badge badge-platform-tactile" style={{ fontSize: '0.65rem' }}>{designPlatform.label}</span>}
+                    <span style={{ marginLeft: 'auto', fontSize: '0.72rem', color: 'var(--paper-text-muted)', fontWeight: 500 }}>Optional</span>
+                  </label>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    <input
+                      type="url"
+                      value={sourceUrl}
+                      onChange={(e) => setSourceUrl(e.target.value)}
+                      className="input-field-tactile"
+                      placeholder="https://www.figma.com/design/... or canva.com/design/..."
+                      style={{ flex: 1, minWidth: 0 }}
+                    />
+                    {sourceUrl && (
+                      <a href={sourceUrl} target="_blank" rel="noopener noreferrer"
+                        className="btn btn-secondary tactile-btn"
+                        style={{ padding: '0 12px', display: 'flex', alignItems: 'center', gap: 4, textDecoration: 'none' }}
+                      >
+                        <ExternalLink size={13} />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* RIGHT COLUMN */}
+              <div className="campaign-form-right" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {/* Attachments */}
+                <div className="form-group full-width">
+                  <label>Attachments <span style={{ color: 'var(--paper-text-muted)', fontWeight: 500 }}>— Optional</span></label>
+                  
+                  {existingAttachments.length > 0 && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 10 }}>
+                      {existingAttachments.filter(a => a.attachment_type === 'file').map(att => (
+                        <div key={att.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px', background: 'var(--paper-bg)', border: '1px solid var(--paper-border)', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem' }}>
+                          <span>{getFileIcon(att.file?.file_type)}</span>
+                          <span style={{ flex: 1, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {att.file?.manager_name || att.file?.original_filename}
+                          </span>
+                          <button type="button" className="btn btn-danger tactile-btn" style={{ padding: '3px 8px', fontSize: '0.72rem' }} onClick={() => handleRemoveExisting(att)}>
                             <Trash2 size={11} />
                           </button>
                         </div>
-                        <div>
-                          <label style={{ fontSize: '0.7rem', fontWeight: 600, display: 'block', marginBottom: 2 }}>Manager Name</label>
-                          <input
-                            type="text"
-                            value={item.managerName}
-                            onChange={(e) => setUploadQueue(prev => prev.map((q, qi) => qi === idx ? { ...q, managerName: e.target.value } : q))}
-                            className="input-field-tactile"
-                            style={{ padding: '5px 8px', fontSize: '0.8rem' }}
-                          />
+                      ))}
+                    </div>
+                  )}
+
+                  {uploadQueue.length > 0 && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 10 }}>
+                      {uploadQueue.map((item, idx) => (
+                        <div key={idx} style={{ padding: '8px 10px', background: 'var(--paper-bg)', border: '1px solid var(--paper-border)', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                            <span style={{ flex: 1, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.file.name}</span>
+                            <button type="button" className="btn btn-danger tactile-btn" style={{ padding: '2px 7px', fontSize: '0.72rem' }} onClick={() => setUploadQueue(prev => prev.filter((_, i) => i !== idx))}>
+                              <Trash2 size={11} />
+                            </button>
+                          </div>
+                          <div>
+                            <label style={{ fontSize: '0.7rem', fontWeight: 600, display: 'block', marginBottom: 2 }}>Manager Name</label>
+                            <input
+                              type="text"
+                              value={item.managerName}
+                              onChange={(e) => setUploadQueue(prev => prev.map((q, qi) => qi === idx ? { ...q, managerName: e.target.value } : q))}
+                              className="input-field-tactile"
+                              style={{ padding: '5px 8px', fontSize: '0.8rem' }}
+                            />
+                          </div>
+                          {item.error && <div className="error-message">{item.error}</div>}
                         </div>
-                        {item.error && <div className="error-message">{item.error}</div>}
-                      </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div
+                    className="upload-dropzone paper-dropzone-tactile"
+                    onClick={() => fileInputRef.current?.click()}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={handleDrop}
+                    style={{ minHeight: 70, padding: '14px' }}
+                  >
+                    <Upload className="upload-dropzone-icon" style={{ width: 20, height: 20 }} />
+                    <div className="upload-dropzone-text" style={{ fontSize: '0.82rem' }}>Click or drop files here</div>
+                    <div className="upload-dropzone-sub">Images, PDFs, DOC, PPT, XLS, Video</div>
+                  </div>
+                  <input ref={fileInputRef} type="file" multiple accept="image/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,video/*" style={{ display: 'none' }} onChange={handleFileSelect} />
+                </div>
+
+                {/* Internal Notes */}
+                <div className="form-group full-width">
+                  <label>Internal Team Notes <span style={{ color: 'var(--paper-text-muted)', fontWeight: 500 }}>— Optional</span></label>
+                  <textarea
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    className="input-field-tactile"
+                    placeholder="Internal instructions, approval notes..."
+                    rows={2}
+                  />
+                </div>
+
+                {/* Campaign Color */}
+                <div className="form-group full-width">
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Palette size={14} /> Campaign Color
+                  </label>
+                  <div className="color-swatch-row">
+                    {COLOR_OPTIONS.map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        title={opt.label}
+                        onClick={() => setColor(opt.value)}
+                        className={`color-swatch-btn ${color === opt.value ? 'selected' : ''}`}
+                        style={{ '--swatch-color': opt.value }}
+                      />
                     ))}
                   </div>
-                )}
-
-                <div
-                  className="upload-dropzone paper-dropzone-tactile"
-                  onClick={() => fileInputRef.current?.click()}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={handleDrop}
-                  style={{ minHeight: 70, padding: '14px' }}
-                >
-                  <Upload className="upload-dropzone-icon" style={{ width: 20, height: 20 }} />
-                  <div className="upload-dropzone-text" style={{ fontSize: '0.82rem' }}>Click or drop files here</div>
-                  <div className="upload-dropzone-sub">Images, PDFs, DOC, DOCX, PPT, PPTX, XLS, XLSX, Video</div>
+                  <div style={{ marginTop: 6, fontSize: '0.8rem', color: 'var(--paper-text-muted)' }}>
+                    Selected: <strong style={{ color }}>{COLOR_OPTIONS.find(o => o.value === color)?.label}</strong>
+                  </div>
                 </div>
-                <input ref={fileInputRef} type="file" multiple accept="image/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,video/*" style={{ display: 'none' }} onChange={handleFileSelect} />
-              </div>
 
-              {/* Source / Reference Link */}
-              <div className="form-group full-width">
-                <label style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                  <span>Source / Reference Link</span>
-                  {sourceUrl && <span className="badge badge-platform-tactile" style={{ fontSize: '0.65rem' }}>{designPlatform.label}</span>}
-                  <span style={{ marginLeft: 'auto', fontSize: '0.72rem', color: 'var(--paper-text-muted)', fontWeight: 500 }}>Optional</span>
-                </label>
-                <div style={{ display: 'flex', gap: 6 }}>
+                {/* Tags */}
+                <div className="form-group full-width">
+                  <label>Tags <span style={{ color: 'var(--paper-text-muted)', fontWeight: 500 }}>— Optional, comma separated</span></label>
                   <input
-                    type="url"
-                    value={sourceUrl}
-                    onChange={(e) => setSourceUrl(e.target.value)}
+                    type="text"
+                    value={tagsInput}
+                    onChange={(e) => setTagsInput(e.target.value)}
                     className="input-field-tactile"
-                    placeholder="https://www.figma.com/design/... or canva.com/design/..."
-                    style={{ flex: 1, minWidth: 0 }}
+                    placeholder="Smart Factory, MES, Automation"
                   />
-                  {sourceUrl && (
-                    <a href={sourceUrl} target="_blank" rel="noopener noreferrer"
-                      className="btn btn-secondary tactile-btn"
-                      style={{ padding: '0 12px', display: 'flex', alignItems: 'center', gap: 4, textDecoration: 'none' }}
-                    >
-                      <ExternalLink size={13} />
-                    </a>
-                  )}
                 </div>
-              </div>
-
-              {/* Internal Notes */}
-              <div className="form-group full-width">
-                <label>Internal Team Notes <span style={{ color: 'var(--paper-text-muted)', fontWeight: 500 }}>— Optional</span></label>
-                <textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  className="input-field-tactile"
-                  placeholder="Internal instructions, approval notes..."
-                  rows={2}
-                />
-              </div>
-
-              {/* Campaign Color */}
-              <div className="form-group full-width">
-                <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <Palette size={14} /> Campaign Color
-                </label>
-                <div className="color-swatch-row">
-                  {COLOR_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      title={opt.label}
-                      onClick={() => setColor(opt.value)}
-                      className={`color-swatch-btn ${color === opt.value ? 'selected' : ''}`}
-                      style={{ '--swatch-color': opt.value }}
-                    />
-                  ))}
-                </div>
-                <div style={{ marginTop: 6, fontSize: '0.8rem', color: 'var(--paper-text-muted)' }}>
-                  Selected: <strong style={{ color }}>{COLOR_OPTIONS.find(o => o.value === color)?.label}</strong>
-                </div>
-              </div>
-
-              {/* Tags */}
-              <div className="form-group full-width">
-                <label>Tags <span style={{ color: 'var(--paper-text-muted)', fontWeight: 500 }}>— Optional, comma separated</span></label>
-                <input
-                  type="text"
-                  value={tagsInput}
-                  onChange={(e) => setTagsInput(e.target.value)}
-                  className="input-field-tactile"
-                  placeholder="Smart Factory, MES, Automation"
-                />
               </div>
 
               {errors.submit && (
-                <div className="form-group full-width">
+                <div className="form-group full-width" style={{ gridColumn: '1 / -1' }}>
                   <div className="error-message" style={{ padding: '8px 12px', background: '#fef2f2', borderRadius: 'var(--radius-sm)', border: '1px solid #fecaca' }}>
                     {errors.submit}
                   </div>
@@ -354,7 +360,7 @@ export default function CampaignModal({ range, onClose, onSave }) {
             </div>
           </div>
 
-          <div className="modal-footer paper-sheet-footer">
+          <div className="modal-footer paper-sheet-footer" style={{ flexShrink: 0, marginTop: 'auto' }}>
             <button type="button" className="btn btn-secondary tactile-btn" onClick={onClose}>Cancel</button>
             <button type="submit" className="btn btn-primary tactile-action-btn" disabled={isSaving}>
               {isSaving ? 'Saving…' : isEdit ? 'Update Campaign' : 'Save Campaign'}
@@ -364,4 +370,5 @@ export default function CampaignModal({ range, onClose, onSave }) {
       </div>
     </div>
   );
+
 }
