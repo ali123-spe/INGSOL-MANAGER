@@ -40,6 +40,7 @@ export default function App() {
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const [posts, setPosts] = useState([]);
   const [dateRanges, setDateRanges] = useState([]);
+  const [isLoadingRanges, setIsLoadingRanges] = useState(true);
   
   // Navigation & Filtering
   const [activeView, setActiveView] = useState('calendar');
@@ -127,11 +128,14 @@ export default function App() {
   };
 
   const refreshDateRanges = async () => {
+    setIsLoadingRanges(true);
     try {
       const ranges = await getUserRanges();
       setDateRanges(ranges);
     } catch (err) {
       console.error("Failed to fetch date ranges:", err);
+    } finally {
+      setIsLoadingRanges(false);
     }
   };
 
@@ -212,24 +216,20 @@ export default function App() {
   }, [refreshContent]);
 
   // V1.5 Campaign saved callback
+  // NOTE: Do NOT close the modal here — CampaignModal.handleSubmit controls
+  // its own lifecycle and calls onClose() after file uploads are done.
+  // Closing here would unmount the modal mid-upload.
   const handleCampaignSaved = useCallback(async (formData) => {
-    try {
-      let saved;
-      if (editingCampaign?.id) {
-        saved = await updateDateRange(editingCampaign.id, formData);
-        setDateRanges(prev => prev.map(r => r.id === saved.id ? saved : r));
-        if (selectedCampaign?.id === saved.id) setSelectedCampaign(saved);
-      } else {
-        saved = await createDateRange(formData);
-        setDateRanges(prev => [...prev, saved].sort((a,b) => a.start_date.localeCompare(b.start_date)));
-      }
-      return saved;
-    } catch (err) {
-      throw err;
-    } finally {
-      setShowCampaignModal(false);
-      setEditingCampaign(null);
+    let saved;
+    if (editingCampaign?.id) {
+      saved = await updateDateRange(editingCampaign.id, formData);
+      setDateRanges(prev => prev.map(r => r.id === saved.id ? saved : r));
+      if (selectedCampaign?.id === saved.id) setSelectedCampaign(saved);
+    } else {
+      saved = await createDateRange(formData);
+      setDateRanges(prev => [...prev, saved].sort((a,b) => a.start_date.localeCompare(b.start_date)));
     }
+    return saved;
   }, [editingCampaign, selectedCampaign]);
 
   const handleDeleteCampaign = useCallback(async (id) => {
@@ -459,6 +459,8 @@ export default function App() {
           <CampaignsView
             allPosts={posts}
             allContent={allContent}
+            dateRanges={dateRanges}
+            isLoading={isLoadingRanges}
             onOpenCampaign={(range) => setSelectedCampaign(range)}
             onCreateCampaign={() => { setEditingCampaign(null); setShowCampaignModal(true); }}
             onEditCampaign={(range) => { setEditingCampaign(range); setShowCampaignModal(true); }}

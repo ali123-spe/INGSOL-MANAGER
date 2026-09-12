@@ -28,36 +28,42 @@ export default function CampaignsView({
   onCreateCampaign,
   onEditCampaign,
   onDeleteCampaign,
-  // Legacy compat
-  dateRanges: externalRanges
+  // App.jsx passes its own synced dateRanges state here for immediate updates
+  dateRanges: externalRanges,
+  // App.jsx also passes its loading state so we show a spinner on initial fetch
+  isLoading: externalLoading
 }) {
-  // Ranges now come from App.jsx via parent context — if passed directly, use them
-  // Otherwise prompt user to use the external dateRanges from App state
-  // CampaignsView receives dateRanges from App via the parent route render
-  // For now we'll use internal Supabase loading as fallback
-  const [ranges, setRanges] = React.useState([]);
-  const [isLoading, setIsLoading] = React.useState(true);
+  // When App provides dateRanges, use them directly (instant update after create/delete).
+  // Only fall back to internal Supabase fetch when no prop is provided.
+  const isExternallyManaged = Array.isArray(externalRanges);
+
+  const [internalRanges, setInternalRanges] = React.useState([]);
+  const [internalLoading, setInternalLoading] = React.useState(!isExternallyManaged);
   const [error, setError] = React.useState(null);
 
   const load = React.useCallback(async () => {
-    setIsLoading(true);
+    if (isExternallyManaged) return; // App manages the list
+    setInternalLoading(true);
     setError(null);
     try {
       const data = await getUserRanges();
-      setRanges(data);
+      setInternalRanges(data);
     } catch (err) {
       setError(err.message || 'Failed to load campaigns.');
     } finally {
-      setIsLoading(false);
+      setInternalLoading(false);
     }
-  }, []);
+  }, [isExternallyManaged]);
 
-  React.useEffect(() => { load(); }, [load]);
-
-  // Refresh after external delete
   React.useEffect(() => {
-    if (externalRanges) setRanges(externalRanges);
-  }, [externalRanges]);
+    if (!isExternallyManaged) load();
+  }, [load, isExternallyManaged]);
+
+  // The list to display: prefer the externally-managed prop
+  const ranges = isExternallyManaged ? externalRanges : internalRanges;
+  // Loading: use parent's flag when externally managed, else internal flag
+  const isLoading = isExternallyManaged ? (externalLoading ?? false) : internalLoading;
+
 
   return (
     <div className="campaigns-view-container">
